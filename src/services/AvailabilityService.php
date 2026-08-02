@@ -704,6 +704,19 @@ class AvailabilityService extends Component
             return [];
         }
 
+        // The far edge of the booking window, enforced here for the same reason as
+        // the near edge below: the wizard already refuses to show dates past it,
+        // but nothing stopped a direct POST to the booking endpoint from landing a
+        // reservation years out. Slot generation is the one place both the slot
+        // list and isSlotAvailable() — and so booking creation — pass through.
+        $maxAdvanceDays = Slots::getInstance()->getSettings()->maximumAdvanceBookingDays ?? 0;
+        if ($maxAdvanceDays > 0) {
+            $windowEnd = (clone $now)->add(new \DateInterval("P{$maxAdvanceDays}D"))->format('Y-m-d');
+            if ($date > $windowEnd) {
+                return [];
+            }
+        }
+
         $minAdvanceHours = Slots::getInstance()->getSettings()->minimumAdvanceBookingHours ?? 0;
 
         // Per-service override takes precedence over global setting

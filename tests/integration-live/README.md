@@ -59,6 +59,21 @@ ddev exec php plugins/slots/tests/integration-live/refund-flow.php <serviceId>
 Note both guards are raised as `RuntimeException`s carrying a translation key, not
 returned as a failed result; the control panel catches them.
 
+## What `coverage-gaps.php` covers
+
+The parts neither the browser suites nor `payments.sh` reach: multi-site
+propagation (`Service` is the only localized element, and its `propagationMethod`
+defaults to `None`), availability rules beyond one schedule shape
+(`timeSlotLength` independent of duration, the minimum-notice window, the
+booking-window ceiling), and capacity at its boundary.
+
+```bash
+ddev exec php plugins/slots/tests/integration-live/coverage-gaps.php
+```
+
+Settings are memoized per request, so a check that changes one must restore the
+in-memory copy as well as the row — otherwise every later check runs against it.
+
 ## Prerequisites
 
 - DDEV running, with the plugin in **`direct`** payment mode and Stripe **test**
