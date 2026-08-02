@@ -22,9 +22,15 @@ ok(){ echo "  ✓ $1"; PASS=$((PASS+1)); }
 bad(){ echo "  ✗ $1"; FAIL=$((FAIL+1)); }
 q(){ ddev mysql -N -e "$1" 2>/dev/null; }
 sql(){ ddev mysql -e "$1" 2>/dev/null; }
+# Reservations are Craft elements, so fixtures must be saved through Craft — a
+# raw INSERT leaves no `elements` row and every payment endpoint 403s on it.
+seed(){ ddev exec php plugins/slots/tests/integration-live/payment-fixture.php "$SERVICE_ID" 'int@example.com' "${1:-0}" 2>/dev/null | tr -d '\r'; }
+seed_id(){ echo "$1" | python3 -c "import json,sys;print(json.load(sys.stdin)['id'])"; }
+seed_token(){ echo "$1" | python3 -c "import json,sys;print(json.load(sys.stdin)['token'])"; }
+
 csrf_jar(){ curl -sS -k -c /tmp/bkintjar "$BASE/index.php?p=actions/users/session-info" -H "Accept: application/json" | python3 -c "import json,sys;print(json.load(sys.stdin)['csrfTokenValue'])"; }
 
-cleanup(){ sql "DELETE p FROM slots_payments p JOIN slots_reservations r ON p.reservationId=r.id WHERE r.userEmail='int@example.com'; DELETE FROM slots_reservations WHERE userEmail='int@example.com'; DELETE FROM slots_soft_locks; UPDATE slots_services SET price=NULL WHERE id=$SERVICE_ID;"; }
+cleanup(){ sql "DELETE p FROM slots_payments p JOIN slots_reservations r ON p.reservationId=r.id WHERE r.userEmail='int@example.com'; DELETE e FROM elements e JOIN slots_reservations r ON r.id=e.id WHERE r.userEmail='int@example.com'; DELETE FROM slots_reservations WHERE userEmail='int@example.com'; DELETE FROM slots_soft_locks; UPDATE slots_services SET price=NULL WHERE id=$SERVICE_ID;"; }
 
 echo "════════ Direct-payment live integration suite ════════"
 CSRF=$(csrf_jar)
@@ -32,9 +38,7 @@ CSRF=$(csrf_jar)
 # ── Scenario 1: full happy path (create → pay → webhook → confirmed) ──
 echo "── 1. Happy path: create → pay → webhook → confirmed ──"
 sql "UPDATE slots_services SET price=50 WHERE id=$SERVICE_ID;"
-TOK="int-$(q 'SELECT LOWER(HEX(RANDOM_BYTES(6)))')"
-sql "INSERT INTO slots_reservations (bookingDate,confirmationToken,userEmail,userName,status,serviceId,quantity,dateCreated,dateUpdated,uid) VALUES ('2026-09-20','$TOK','int@example.com','Integ','pending',$SERVICE_ID,1,NOW(),NOW(),UUID());"
-RID=$(q "SELECT id FROM slots_reservations WHERE confirmationToken='$TOK';")
+SEED1=$(seed); RID=$(seed_id "$SEED1"); TOK=$(seed_token "$SEED1")
 CREATE=$(curl -sS -k -b /tmp/bkintjar "$BASE/index.php?p=slots/api/v1/payment/create" -H "Accept: application/json" -H "X-CSRF-Token: $CSRF" -d "reservationId=$RID" -d "token=$TOK")
 CS=$(echo "$CREATE" | python3 -c "import json,sys;print(json.load(sys.stdin).get('clientSecret',''))" 2>/dev/null)
 [ -n "$CS" ] && ok "payment/create returned a clientSecret" || bad "payment/create failed: $CREATE"
@@ -52,9 +56,7 @@ INSTALL_CUR=$(q "SELECT COALESCE(NULLIF(defaultCurrency,'auto'),'USD') FROM slot
 
 # ── Scenario 3: CRITICAL — GC never cancels a paid booking ──
 echo "── 3. GC paid-exclusion (critical race guard) ──"
-GTOK="int-gc-$(q 'SELECT LOWER(HEX(RANDOM_BYTES(6)))')"
-sql "INSERT INTO slots_reservations (bookingDate,confirmationToken,userEmail,userName,status,serviceId,quantity,dateCreated,dateUpdated,uid) VALUES ('2026-09-20','$GTOK','int@example.com','GCpaid','pending',$SERVICE_ID,1,'2026-07-01 00:00:00',NOW(),UUID());"
-GID=$(q "SELECT id FROM slots_reservations WHERE confirmationToken='$GTOK';")
+SEED3=$(seed 10080); GID=$(seed_id "$SEED3")
 sql "INSERT INTO slots_payments (reservationId,gateway,externalId,status,amount,currency,refundedAmount,dateCreated,dateUpdated,uid) VALUES ($GID,'stripe','pi_int_paid_$GID','paid',5000,'$INSTALL_CUR',0,NOW(),NOW(),UUID());"
 ddev exec 'cd /var/www/html && php craft gc' >/dev/null 2>&1
 GST=$(q "SELECT status FROM slots_reservations WHERE id=$GID")
@@ -62,18 +64,14 @@ GST=$(q "SELECT status FROM slots_reservations WHERE id=$GID")
 
 # ── Scenario 4: GC DOES cancel an unpaid stale pending ──
 echo "── 4. GC cancels an unpaid stale pending ──"
-UTOK="int-gcu-$(q 'SELECT LOWER(HEX(RANDOM_BYTES(6)))')"
-sql "INSERT INTO slots_reservations (bookingDate,confirmationToken,userEmail,userName,status,serviceId,quantity,dateCreated,dateUpdated,uid) VALUES ('2026-09-20','$UTOK','int@example.com','GCunpaid','pending',$SERVICE_ID,1,'2026-07-01 00:00:00',NOW(),UUID());"
-UID2=$(q "SELECT id FROM slots_reservations WHERE confirmationToken='$UTOK';")
+SEED4=$(seed 10080); UID2=$(seed_id "$SEED4")
 ddev exec 'cd /var/www/html && php craft gc' >/dev/null 2>&1
 [ "$(q "SELECT status FROM slots_reservations WHERE id=$UID2")" = "cancelled" ] && ok "GC cancelled the unpaid stale pending" || bad "GC left an abandoned pending"
 
 # ── Scenario 5: reconcile recovers a missed webhook ──
 echo "── 5. reconcile: pending record for a paid intent → paid ──"
 RPI=$(stripe payment_intents create -d amount=4200 -d currency=usd -d "payment_method=pm_card_visa" -d confirm=true -d "automatic_payment_methods[enabled]=true" -d "automatic_payment_methods[allow_redirects]=never" 2>/dev/null | python3 -c "import json,sys;print(json.load(sys.stdin)['id'])")
-RTOK2="int-rec-$(q 'SELECT LOWER(HEX(RANDOM_BYTES(6)))')"
-sql "INSERT INTO slots_reservations (bookingDate,confirmationToken,userEmail,userName,status,serviceId,quantity,dateCreated,dateUpdated,uid) VALUES ('2026-09-20','$RTOK2','int@example.com','Recon','pending',$SERVICE_ID,1,NOW(),NOW(),UUID());"
-RRID=$(q "SELECT id FROM slots_reservations WHERE confirmationToken='$RTOK2';")
+SEED5=$(seed); RRID=$(seed_id "$SEED5")
 sql "INSERT INTO slots_payments (reservationId,gateway,externalId,status,amount,currency,refundedAmount,dateCreated,dateUpdated,uid) VALUES ($RRID,'stripe','$RPI','pending',4200,'$INSTALL_CUR',0,NOW(),NOW(),UUID());"
 ddev exec 'cd /var/www/html && php craft slots/payments/reconcile' >/dev/null 2>&1
 [ "$(q "SELECT status FROM slots_payments WHERE externalId='$RPI'")" = "paid" ] && ok "reconcile flipped the pending record to paid" || bad "reconcile did not recover the payment"
