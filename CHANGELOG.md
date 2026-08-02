@@ -26,5 +26,7 @@ does and, just as deliberately, what it does not.
 
 ### Notes
 - One third-party dependency (`stripe/stripe-php`)
-- Schema installs from a single migration; `schemaVersion` starts at 1.0.0
-- MySQL 8.0.17+ and PostgreSQL 13+ are both supported and both covered by the test suite
+- A fresh install builds the whole schema from `Install.php`; `schemaVersion` is 1.2.0
+- MySQL 8.0.17+ and PostgreSQL 13+ are both supported. Postgres is verified by a manual
+  browser-suite run against a Postgres install — see `tests/e2e/README.md` — not by the
+  automated suite, which does not touch a database
