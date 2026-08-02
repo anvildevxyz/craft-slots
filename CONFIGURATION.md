@@ -116,19 +116,32 @@ This means: full refund if cancelled 48+ hours before, 50% if 24-48 hours, no re
 
 ---
 
-## Staff Access & Managed Employees
+## Staff Access
 
-Staff access is configured per-employee, not via settings:
+A staff member sees only the bookings for the employee record they are linked to.
+That link is per-employee, not a setting.
 
-1. **Link employee to Craft user**: Employee edit page → User field
-2. **Assign permissions**: Give the user `slots-viewBookings`
-3. **Managed employees** (optional): Assign other employees via the Managed Employees field — the staff user sees their bookings too
+1. **Link the employee to a Craft user** — Employee edit page → User field (one user
+   per employee).
+2. **Grant the user's group three permissions.** All three are needed, and missing
+   any one of them produces a 403 rather than an empty screen:
 
-| Role | Permission | Sees |
-|------|-----------|------|
-| Staff | `slots-viewBookings` + linked Employee | Own + managed employees' bookings |
-| Supervisor | `slots-manageBookings` | All bookings |
+   | Permission | Where it lives | Why |
+   |---|---|---|
+   | Access the control panel | Craft, General | Lets a non-admin reach `/admin` at all |
+   | Access Slots | Craft, per-plugin | Craft gates every `/admin/slots/…` URL on this |
+   | Slots → View bookings | this plugin | Shows the Bookings screen, scoped to their employee |
+
+   Craft's "Access Slots" and this plugin's own "Slots" permission tree are two
+   different things with similar names. Both are required.
+
+| Role | Permissions | Sees |
+|------|-------------|------|
+| Staff | the three above | Only their own employee's bookings |
+| Supervisor | add `slots-manageBookings` | All bookings — this switches scoping off |
 | Admin | Admin account | Everything |
+
+Scoping applies to the bookings list, the calendar and the dashboard alike.
 
 ---
 
@@ -148,28 +161,36 @@ The ICS endpoint returns a `text/calendar` response with a `Content-Disposition:
 
 ## Booking Wizard Behavior
 
-The wizard adapts its flow automatically:
+The wizard adapts its flow automatically, skipping any step that has only one
+possible answer:
 
-- **Extras step** is skipped when: the service has no enabled extras
-- **Location step** is skipped when: the service has its own schedule, only one location exists, or no locations are configured
+- **Location step** is skipped when the service has its own schedule, only one
+  location exists, or no locations are configured
 - **Employee step** is skipped for schedule-based services (tours, classes)
 
-| Service Type | Extras Step | Location Step | Employee Step |
-|-------------|------------|--------------|--------------|
-| Employee-based (massage, consultation) | Shows if extras exist | Shows if multiple locations | Shows available employees |
-| Schedule-based (tour, class) | Shows if extras exist | Skipped | Skipped |
+| Service type | Location step | Employee step |
+|---|---|---|
+| Employee-based (massage, consultation) | Shows if multiple locations | Shows available employees |
+| Schedule-based (tour, class) | Skipped | Skipped |
+
+A single-service, single-staff setup therefore reduces to "pick a time".
 
 ---
 
 ## Environment Variables
 
-Store sensitive credentials in your `.env` file and reference them via environment variable fields in the Craft CP:
+Keep secrets out of project config: put them in `.env` and reference them from the
+CP settings fields, which accept environment variables.
 
 ```bash
 # .env
+STRIPE_PUBLISHABLE_KEY=pk_live_…
+STRIPE_SECRET_KEY=sk_live_…
+STRIPE_WEBHOOK_SECRET=whsec_…
 ```
 
-In the CP settings fields, reference these as `$GOOGLE_CALENDAR_CLIENT_ID` etc.
+In **Settings → Slots → Payments**, enter `$STRIPE_SECRET_KEY` rather than the key
+itself. The same applies to the CAPTCHA keys under Security.
 
 ---
 

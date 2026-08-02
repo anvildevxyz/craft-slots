@@ -693,10 +693,6 @@ Reserves a **date range** for a day-based service while the customer completes c
 
 Returns all enabled services with title, `duration`, price, buffers and `locationIds`.
 
-`GET /actions/slots/booking-data/get-service-extras?serviceId=1` (anonymous)
-
-Returns extras for a service: id, title, description, price, duration, maxQuantity, isRequired.
-
 `GET /actions/slots/booking-data/get-employees` (anonymous)
 
 | Parameter | Type | Required | Description |
@@ -997,29 +993,37 @@ When `enableAuditLog` is enabled, security events are logged to `@storage/logs/s
 - CAPTCHA failures (`captcha_failed`, `captcha_missing`)
 - Honeypot triggers (`honeypot_triggered`)
 
-### Staff Permissions & Managed Employees
+### Staff Permissions
 
-Slots supports a role-based staff model where a Craft user linked to an Employee record can view and manage bookings for their own employee and any additional employees assigned to them.
+A Craft user linked to an Employee record sees only that employee's bookings.
 
 #### Concepts
 
 | Concept | Description |
 |---------|-------------|
-| **Employee.userId** | 1:1 link between an Employee and a Craft user — "this employee IS this user". Enforced unique (one user per employee). |
-| **Managed Employees** | Additional employees whose bookings a staff employee can view/manage. Configured on the employee edit page via the "Managed Employees" field. |
-| **Staff member** | A Craft user with `slots-viewBookings` but NOT `slots-manageBookings`, linked to at least one Employee. Sees only their own + managed employees' bookings. |
-| **Supervisor/Admin** | A Craft user with `slots-manageBookings` or admin status. Sees all bookings. |
+| **Employee.userId** | 1:1 link between an Employee and a Craft user — "this employee IS this user". Unique: one user per employee. |
+| **Staff member** | A user with `slots-viewBookings` but NOT `slots-manageBookings`, linked to an Employee. Sees only their own employee's bookings. |
+| **Supervisor/Admin** | A user with `slots-manageBookings`, or an admin. Scoping is switched off entirely — they see everything. |
 
-#### How It Works
+#### How it works
 
-1. A Craft user account is linked to an Employee via `userId` (1:1, set on the employee edit page)
-2. On that employee's edit page, additional employees are assigned under **Managed Employees**
-3. When the staff user logs in, `PermissionService` resolves their visible employees:
-   - The employee they ARE (via `userId`)
-   - All employees assigned in **Managed Employees**
-4. Booking queries, the calendar, and the dashboard are automatically scoped to those employees
+1. A Craft user is linked to an Employee via `userId`, set on the employee edit screen.
+2. `PermissionService::getEmployeesForUser()` resolves that one employee.
+3. `getStaffEmployeeIds()` returns their ids — or `null`, meaning "no scoping", for
+   admins and anyone holding `slots-manageBookings`.
+4. `scopeReservationQuery()` applies that to booking queries, so the list, the
+   calendar and the dashboard are all scoped the same way.
 
-This means you only need a few Craft user accounts for staff — each staff employee can manage multiple other employees who don't need their own accounts.
+A staff user who is linked to no employee sees no bookings rather than all of them:
+the scope resolves to an empty set, which is the safe direction to fail in.
+
+#### Reaching the control panel at all
+
+Scoping only comes into play once the user is through Craft's own two gates. A
+non-admin needs **Access the control panel**, **Access Slots** (Craft creates one
+per plugin, `accessPlugin-slots`), and then this plugin's `slots-viewBookings`.
+Granting only the plugin's permissions yields a 403 from Craft before any plugin
+code runs.
 
 #### Craft Permissions
 
@@ -1434,7 +1438,7 @@ When a logged-in user creates a booking, it's automatically linked to their acco
 - Fallback to email matching for legacy bookings
 - User-specific booking history in the account portal
 
-**Employee user linking** is separate from customer user linking. An Employee's `userId` field links the employee to a Craft user account (1:1), enabling that user to log in as staff and view their employee's bookings. See [Staff Permissions & Managed Employees](#staff-permissions--managed-employees) for details on how staff users can manage multiple employees.
+**Employee user linking** is separate from customer user linking. An Employee's `userId` field links the employee to a Craft user account (1:1), enabling that user to log in as staff and view their employee's bookings. See [Staff Permissions](#staff-permissions) for how the scoping works.
 
 ### JavaScript/AJAX Example: Fetch Available Slots
 

@@ -42,10 +42,13 @@ Employees are the people who perform services. Skip this step if you're creating
 4. Under **Services**, check `Consultation`
 5. Click **Save**
 
-> **Tip: Staff access & managed employees**
-> If you want Sarah to log in and manage her own bookings, link her to a Craft user account via the **User** field on her employee page. She'll then see her bookings in the control panel.
->
-> If Sarah also manages other employees (e.g. a team lead overseeing junior staff), use the **Managed Employees** field on her employee page to assign them. She'll see their bookings too — without those employees needing their own Craft accounts. See the [Developer Guide](DEVELOPER_GUIDE.md#staff-permissions--managed-employees) for details.
+> **Tip: staff access**
+> To let Sarah sign in and see her own bookings, link her to a Craft user account
+> via the **User** field on her employee page, then give her group three
+> permissions: *Access the control panel*, *Access Slots*, and *Slots → View
+> bookings*. All three are needed — with any one missing she gets a 403 rather
+> than an empty screen. She will then see her bookings, and only hers. See
+> [Configuration](CONFIGURATION.md#staff-access) for the details.
 
 ---
 
@@ -95,14 +98,13 @@ Create `templates/book.twig`:
 {% endblock %}
 ```
 
-The wizard automatically handles service selection, extras (optional add-ons), employee selection, date/time picking, and form submission.
+The wizard automatically handles service selection, employee selection, date/time picking, and form submission.
 
 A step is only shown when it offers a real choice, so it is skipped when:
 
 | Step | Skipped when |
 | --- | --- |
 | Service | Exactly one service exists (it is selected automatically) |
-| Extras | The selected service has no add-ons |
 | Location | Zero or one location serves the service |
 | Employee | Zero or one employee offers the service |
 
