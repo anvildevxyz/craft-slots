@@ -336,6 +336,9 @@
                         var params = new URLSearchParams();
                         params.append('date', dateInput.value);
                         params.append('quantity', quantity);
+                        // Discount this booking from its own availability, so the
+                        // grid shows where it can actually move to.
+                        params.append('manageToken', manageToken);
                         if (employeeId) { params.append('employeeId', employeeId); }
                         if (locationId) { params.append('locationId', locationId); }
                         if (serviceId) { params.append('serviceId', serviceId); }
