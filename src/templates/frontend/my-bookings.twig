@@ -13,7 +13,9 @@
  */
 #}
 
-{% extends "_layout" %}
+{# Use the project's layout when it has one; fall back to the plugin's so the
+   page renders on a site that ships no `_layout`. #}
+{% extends craft.app.view.doesTemplateExist('_layout') ? '_layout' : 'slots/_fallback-layout' %}
 
 {% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsAsset") %}
 
