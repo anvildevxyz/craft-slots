@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# A superseded run on the same branch has nothing left to prove.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  php:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The floor and the ceiling of the supported range. 8.4 is included
+        # because it deprecates implicitly-nullable parameters, which is how the
+        # suite stopped running locally once — silently, at collection time.
+        php: ['8.2', '8.3', '8.4']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          # dom/mbstring/intl are Craft's; the suite formats dates and currency.
+          extensions: dom, mbstring, intl, json, pdo
+          coverage: none
+          tools: composer:v2
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer/files
+          key: composer-${{ matrix.php }}-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-${{ matrix.php }}-
+
+      # composer.lock is committed on purpose, so install rather than update:
+      # CI should fail when the lock drifts from composer.json, not paper over it.
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Coding standards (ECS)
+        run: composer run ecs:check
+
+      - name: Static analysis (PHPStan)
+        run: composer run phpstan
+
+      - name: Unit tests
+        run: composer run test
+
+  js:
+    name: JavaScript
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Unit tests
+        run: npm test
+
+      # dist/ and the served bundle are committed so Composer consumers don't
+      # need a build step. That only holds if they match the source — a stale
+      # bundle ships behaviour nobody can see in a diff.
+      - name: Rebuild the wizard bundle
+        run: npm run build
+
+      - name: Fail if the committed bundle is out of date
+        run: |
+          if ! git diff --quiet -- dist src/web/js/slots-wizard.umd.js src/web/js/slots-wizard.umd.js.map; then
+            echo "::error::The committed bundle differs from a fresh build. Run 'npm run build' and commit the result."
+            git diff --stat -- dist src/web/js/slots-wizard.umd.js src/web/js/slots-wizard.umd.js.map
+            exit 1
+          fi
+          echo "Committed bundle matches the source."
