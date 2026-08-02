@@ -58,4 +58,4 @@ parameters:
     checkExplicitMixed: true
 
 includes:
-    - ../../vendor/craftcms/phpstan/phpstan.neon
+    - vendor/craftcms/phpstan/phpstan.neon
