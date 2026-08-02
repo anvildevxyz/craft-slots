@@ -533,7 +533,13 @@ class AvailabilityServiceTest extends TestCase
             dirname(__DIR__, 3) . '/src/services/AvailabilityService.php'
         );
         $methodStart = strpos($source, 'function filterPastSlots');
-        $methodSource = substr($source, $methodStart, 2000);
+        // Read to the next method rather than a fixed number of characters: a
+        // slice long enough today silently stops covering the assertion the
+        // moment the method grows, and reports it as a broken contract.
+        $nextMethod = strpos($source, "\n    private function ", $methodStart + 1);
+        $methodSource = $nextMethod !== false
+            ? substr($source, $methodStart, $nextMethod - $methodStart)
+            : substr($source, $methodStart);
         $this->assertStringContainsString(
             "substr(\$slot['time'], 0, 5) > \$cutoffTime",
             $methodSource,
