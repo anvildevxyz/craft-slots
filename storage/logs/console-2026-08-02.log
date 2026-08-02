@@ -30,3 +30,7 @@
 2026-08-02 19:27:56 [console.ERROR] [craft\db\Connection::open] SQLSTATE[HY000] [2002] No such file or directory {"memory":52785160} 
 2026-08-02 19:27:57 [console.ERROR] [craft\db\Connection::open] SQLSTATE[HY000] [2002] No such file or directory {"memory":59077288} 
 2026-08-02 19:27:57 [console.ERROR] [craft\db\Connection::open] SQLSTATE[HY000] [2002] No such file or directory {"memory":59077720} 
+2026-08-02 20:01:25 [console.ERROR] [craft\db\Connection::open] SQLSTATE[HY000] [2002] No such file or directory {"memory":52784680} 
+2026-08-02 20:01:25 [console.ERROR] [craft\db\Connection::open] SQLSTATE[HY000] [2002] No such file or directory {"memory":52785112} 
+2026-08-02 20:01:25 [console.ERROR] [craft\db\Connection::open] SQLSTATE[HY000] [2002] No such file or directory {"memory":52785648} 
+2026-08-02 20:01:25 [console.ERROR] [craft\db\Connection::open] SQLSTATE[HY000] [2002] No such file or directory {"memory":52786080} 
