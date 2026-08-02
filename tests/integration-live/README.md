@@ -45,6 +45,20 @@ would retroactively reject already-saved data fails the run.
 ddev exec php plugins/slots/tests/integration-live/refund-tiers-validation.php
 ```
 
+## What `refund-flow.php` covers
+
+Refunds in the direction `payments.sh` does not: `PaymentService::refund()` itself
+— full, partial, over-refund refusal — and the refund tiers, which stay pure maths
+until there is a real payment to clamp. Enables `allowRefund` on the service for
+the run and restores it.
+
+```bash
+ddev exec php plugins/slots/tests/integration-live/refund-flow.php <serviceId>
+```
+
+Note both guards are raised as `RuntimeException`s carrying a translation key, not
+returned as a failed result; the control panel catches them.
+
 ## Prerequisites
 
 - DDEV running, with the plugin in **`direct`** payment mode and Stripe **test**
