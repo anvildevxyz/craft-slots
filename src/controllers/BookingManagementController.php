@@ -424,10 +424,15 @@ class BookingManagementController extends Controller
             return $isJson ? $this->jsonError($msg) : $this->_redirectWithError($msg);
         }
 
+        // The reservation being moved must not be counted against itself. Without
+        // excluding it, its own slot — and, on a service with buffers, the slots
+        // its buffer overlaps — read as taken, so the customer is refused the very
+        // slot the reschedule panel just offered them.
         if (!$this->availabilityService->isSlotAvailable(
             $newDate, $newStartTime, $newEndTime,
             $reservation->getEmployeeId(), $reservation->getLocationId(),
-            $reservation->getServiceId(), $reservation->getQuantity()
+            $reservation->getServiceId(), $reservation->getQuantity(),
+            excludeReservationId: $reservation->getId(),
         )) {
             $msg = Craft::t('slots', 'booking.slotNotAvailable');
             return $isJson ? $this->jsonError($msg) : $this->_redirectWithError($msg);

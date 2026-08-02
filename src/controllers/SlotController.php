@@ -6,6 +6,7 @@ use anvildev\slots\controllers\traits\BookingHelpersTrait;
 use anvildev\slots\controllers\traits\HandlesExceptionsTrait;
 use anvildev\slots\controllers\traits\JsonResponseTrait;
 use anvildev\slots\elements\Service;
+use anvildev\slots\factories\ReservationFactory;
 use anvildev\slots\helpers\DateHelper;
 use anvildev\slots\helpers\SiteHelper;
 use anvildev\slots\Slots;
@@ -69,8 +70,22 @@ class SlotController extends Controller
         $locationId = $this->normalizeId(Craft::$app->request->getBodyParam('locationId'));
         $serviceId = $this->normalizeId(Craft::$app->request->getBodyParam('serviceId'));
 
+        // A reschedule asks "where else could this booking go?", so the booking
+        // itself must not count as taken — otherwise its own slot, and on a
+        // buffered service the slots its buffer overlaps, read as unavailable and
+        // the panel offers times the reschedule then refuses. The caller proves
+        // which reservation to discount with its signed manage token rather than a
+        // raw id, so one customer cannot exclude another's booking.
+        $manageToken = Craft::$app->request->getBodyParam('manageToken');
+        $excludeReservationId = $manageToken
+            ? ReservationFactory::findByToken($manageToken)?->getId()
+            : null;
+
         return $this->jsonSuccess('', [
-            'slots' => $this->availabilityService->getAvailableSlots($date, $employeeId, $locationId, $serviceId, $quantity, null, null),
+            'slots' => $this->availabilityService->getAvailableSlots(
+                $date, $employeeId, $locationId, $serviceId, $quantity, null, null,
+                excludeReservationId: $excludeReservationId,
+            ),
         ]);
     }
 
