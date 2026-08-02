@@ -9,9 +9,12 @@ parameters:
         - src/translations/*
     tmpDir: .phpstan
     treatPhpDocTypesAsCertain: false
+    # The plugin's own vendor, not the host project's. Both contain a complete
+    # Craft, but only this one exists when the repo is checked out on its own —
+    # which is how CI runs it, and how anyone who clones the plugin runs it.
     bootstrapFiles:
-        - ../../vendor/autoload.php
-        - ../../vendor/craftcms/cms/bootstrap/console.php
+        - vendor/autoload.php
+        - vendor/craftcms/cms/bootstrap/console.php
         - stubs/phpstan-bootstrap.php
     ignoreErrors:        # Common patterns for Craft CMS plugins
         - '#Cannot access offset .+ on mixed#'
@@ -38,6 +41,10 @@ parameters:
         - '#Method .+BookingVariable::services\(\) should return .+ServiceQuery but returns craft\\elements\\db\\ElementQuery#'
         # yii2-redis is an optional dependency for MutexFactory
         - '#Instantiated class yii\\redis\\Mutex not found#'
+        # Craft Commerce is not a dependency — the currency resolvers read its
+        # primary payment currency only when the plugin happens to be installed,
+        # behind isPluginEnabled('commerce') and a try/catch.
+        - '#Call to static method getInstance\(\) on an unknown class craft\\commerce\\Plugin#'
         - '#Method .+MutexFactory::createRedisMutex\(\) should return yii\\mutex\\Mutex but returns yii\\redis\\Mutex#'
         # Condition rules call custom query methods via ElementQueryInterface (Craft CMS pattern)
         - '#Call to an undefined method craft\\elements\\db\\ElementQueryInterface::\w+\(\)#'
