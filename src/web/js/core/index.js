@@ -5,7 +5,7 @@
  * `version` is the core contract version, semver'd independently of the plugin:
  * additions bump minor, removals/renames bump major.
  */
-export const version = '1.0.0-dev';
+export const version = '1.0.0';
 
 export { Wizard, create } from './wizard.js';
 export { Emitter } from './emitter.js';

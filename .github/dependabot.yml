@@ -26,3 +26,32 @@ updates:
       - dependency-name: "phpstan/phpstan"
         update-types:
           - version-update:semver-major
+
+  # The wizard's build/test toolchain. Grouped for the same reason as the PHP
+  # dev dependencies: one rollup PR beats one per package.
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - javascript
+    commit-message:
+      prefix: chore
+      prefix-development: chore
+    groups:
+      dev-dependencies:
+        dependency-type: development
+
+  # Keeps the actions the CI workflow pins from going stale.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: monthly
+    labels:
+      - dependencies
+      - ci
+    commit-message:
+      prefix: chore
+
