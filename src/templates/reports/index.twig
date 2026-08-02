@@ -1,0 +1,35 @@
+{% extends "_layouts/cp" %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsCpAsset") %}
+
+{% set title = "reports.title"|t('slots') %}
+{% set selectedSubnavItem = 'reports' %}
+
+{% block content %}
+    <div class="reports-index">
+        <div class="slots-summary-card summary-blue slots-mb-24">
+            <div class="slots-summary-value" style="font-size: 32px;">{{ "reports.title"|t('slots') }}</div>
+        </div>
+
+        <div class="slots-grid-auto">
+            <a href="{{ url('slots/reports/revenue') }}" class="report-card">
+                <div class="report-card-content">
+                    <div class="report-card-icon bg-green">💰</div>
+                    <div>
+                        <h3 class="report-card-title">{{ "reports.revenue.title"|t('slots') }}</h3>
+                        <p class="report-card-desc">{{ "reports.revenue.description"|t('slots') }}</p>
+                    </div>
+                </div>
+            </a>
+
+
+
+
+
+
+
+
+
+
+        </div>
+    </div>
+{% endblock %}

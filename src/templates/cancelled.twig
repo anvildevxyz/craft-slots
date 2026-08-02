@@ -1,0 +1,86 @@
+{#
+/**
+ * Booking Cancelled Success Template
+ *
+ * Displays success message after booking is cancelled
+ * Accessed via: /booking/cancel/{token} (POST request, after cancellation)
+ *
+ * Variables:
+ * - reservation: ReservationInterface
+ */
+#}
+
+{% extends "_layout" %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsAsset") %}
+
+{% set bodyClass = 'page-booking-cancelled' %}
+{% set bookingPageUrl = craft.slots.getSettings().bookingPageUrl ?? '/' %}
+
+{% block content %}
+<div class="slots-wizard">
+
+    {# Success band #}
+    <div class="slots-manage-bar slots-manage-bar--success">
+        <span class="slots-manage-bar-label">{{ 'templates.bookingCancelled'|t('slots') }}</span>
+    </div>
+
+    {# Hero #}
+    <div class="slots-manage-hero">
+        <div class="slots-manage-hero-icon slots-manage-hero-icon--success">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="m9 12 2 2 4-4"></path>
+            </svg>
+        </div>
+        <div class="slots-manage-datetime slots-struck">{{ reservation.getFormattedDateTime() }}</div>
+        <p class="slots-manage-hero-sub">{{ 'templates.bookingCancelledSuccess'|t('slots') }}</p>
+    </div>
+
+    <div class="slots-manage-body">
+
+        {# Cancelled booking details #}
+        <div class="slots-manage-section slots-manage-reveal" style="animation-delay: 0.05s">
+            <div class="slots-manage-section-title">{{ 'templates.cancelledDetails'|t('slots') }}</div>
+            <div class="slots-manage-grid">
+                <div class="slots-manage-row">
+                    <span class="slots-manage-label">{{ 'templates.dateTime'|t('slots') }}</span>
+                    <span class="slots-manage-value slots-struck">{{ reservation.getFormattedDateTime() }}</span>
+                </div>
+                <div class="slots-manage-row">
+                    <span class="slots-manage-label">{{ 'templates.name'|t('slots') }}</span>
+                    <span class="slots-manage-value">{{ reservation.userName }}</span>
+                </div>
+                <div class="slots-manage-row">
+                    <span class="slots-manage-label">{{ 'templates.email'|t('slots') }}</span>
+                    <span class="slots-manage-value">{{ reservation.userEmail }}</span>
+                </div>
+            </div>
+        </div>
+
+        {# What's next #}
+        <div class="slots-manage-section slots-manage-reveal" style="animation-delay: 0.1s">
+            <div class="slots-manage-section-title">{{ 'templates.whatsNext'|t('slots') }}</div>
+            <ul class="slots-manage-list">
+                <li>{{ 'templates.confirmationEmailSent'|t('slots', { email: reservation.userEmail }) }}</li>
+                <li>{{ 'templates.noChargesApplied'|t('slots') }}</li>
+                <li>{{ 'templates.canBookNewAppointment'|t('slots') }}</li>
+            </ul>
+        </div>
+
+        {# Actions #}
+        <div class="slots-manage-actions slots-manage-reveal" style="animation-delay: 0.15s">
+            <a href="{{ bookingPageUrl }}" class="btn btn-primary">
+                {{ 'templates.bookAgain'|t('slots') }}
+            </a>
+            <a href="/" class="btn">
+                {{ 'templates.backToHome'|t('slots') }}
+            </a>
+        </div>
+
+        <p class="slots-manage-footnote">
+            {{ 'templates.contactUs'|t('slots', { email: craft.app.projectConfig.get('email.fromEmail') }) }}
+        </p>
+    </div>
+
+</div>
+{% endblock %}

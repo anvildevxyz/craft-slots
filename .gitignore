@@ -1,0 +1,33 @@
+/vendor/
+/node_modules/
+/yarn.lock
+/pnpm-lock.yaml
+/pnpm-workspace.yaml
+
+# package.json, package-lock.json and dist/ are tracked on purpose:
+# dist/ ships the compiled wizard bundle to Composer consumers (who don't run a build),
+# and the lockfile keeps CI's budget check deterministic.
+
+# Testing artifacts
+.phpunit.result.cache
+/tests/_output/*
+/tests/_support/_generated/*
+/tests/_craft/storage/*
+/tests/_craft/config/db.php
+/tests/_craft/config/test.php
+/tests/test.env
+
+# Local development
+.DS_Store
+.worktrees/
+.env
+.env.local
+.env.*.local
+.phpstan/
+.claude/worktrees/
+coverage/
+
+# Playwright
+test-results/
+playwright-report/
+/node_modules/@playwright/

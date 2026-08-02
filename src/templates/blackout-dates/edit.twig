@@ -1,0 +1,81 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+
+{% set selectedSubnavItem = 'blackout-dates' %}
+{% set title = blackoutDate ? 'blackoutDate.edit'|t('slots') : 'blackoutDate.new'|t('slots') %}
+
+{% set fullPageForm = true %}
+
+{% block content %}
+	<input type="hidden" name="action" value="slots/cp/blackout-dates/save">
+	{% if blackoutDate %}
+		<input type="hidden" name="elementId" value="{{ blackoutDate.id }}">
+	{% endif %}
+
+	<div id="fields">
+		<div class="field first">
+			{{ forms.lightswitchField({
+                label: 'status.active'|t('slots'),
+                id: 'isActive',
+                name: 'isActive',
+                on: blackoutDate ? blackoutDate.isActive : true
+            }) }}
+		</div>
+
+		<div class="field">
+			{{ forms.textField({
+                label: 'Title'|t('app'),
+                id: 'title',
+                name: 'title',
+                value: blackoutDate.title ?? '',
+                required: true,
+                autofocus: true,
+                errors: blackoutDate ? blackoutDate.getErrors('title') : []
+            }) }}
+		</div>
+
+		<div class="field">
+			{{ forms.dateField({
+                label: 'labels.startDate'|t('slots'),
+                id: 'startDate',
+                name: 'startDate',
+                value: blackoutDate.startDate ?? '',
+                required: true,
+                errors: blackoutDate ? blackoutDate.getErrors('startDate') : []
+            }) }}
+		</div>
+
+		<div class="field">
+			{{ forms.dateField({
+                label: 'labels.endDate'|t('slots'),
+                id: 'endDate',
+                name: 'endDate',
+                value: blackoutDate.endDate ?? '',
+                required: true,
+                errors: blackoutDate ? blackoutDate.getErrors('endDate') : []
+            }) }}
+		</div>
+
+		<div class="field">
+			{{ forms.elementSelectField({
+                label: 'labels.locations'|t('slots'),
+                id: 'locationIds',
+                name: 'locationIds',
+                elementType: 'anvildev\\slots\\elements\\Location',
+                elements: blackoutDate ? blackoutDate.getLocations() : [],
+                limit: null,
+            }) }}
+		</div>
+
+		<div class="field">
+			{{ forms.elementSelectField({
+                label: 'labels.employees'|t('slots'),
+                id: 'employeeIds',
+                name: 'employeeIds',
+                elementType: 'anvildev\\slots\\elements\\Employee',
+                elements: blackoutDate ? blackoutDate.getEmployees() : [],
+                limit: null,
+            }) }}
+		</div>
+	</div>
+{% endblock %}

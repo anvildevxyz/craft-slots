@@ -1,0 +1,97 @@
+{#
+/**
+ * Mini Calendar Component
+ *
+ * A compact calendar widget for quick date navigation
+ * Shows booking indicators on days with reservations
+ *
+ * @param DateTime selectedDate - Currently selected date
+ * @param string view - Current view type (month, week, day)
+ * @param array bookingCounts - Array of dates with booking counts [date => count]
+ */
+#}
+
+{% set now = now|date_modify('midnight') %}
+{% set miniCalDate = selectedDate ?? now %}
+{% set miniYear = miniCalDate|date('Y') %}
+{% set miniMonth = miniCalDate|date('m') %}
+
+{% set miniPrevMonth = miniCalDate.format('Y-m-d')|date_modify('-1 month') %}
+{% set miniNextMonth = miniCalDate.format('Y-m-d')|date_modify('+1 month') %}
+
+<div class="mini-calendar">
+    <div class="mini-calendar-header">
+        <button
+            onclick="location.href='{{ url('slots/calendar-view/' ~ view, {
+                date: miniPrevMonth|date('Y-m-d'),
+                year: miniPrevMonth|date('Y'),
+                month: miniPrevMonth|date('m')
+            }) }}'"
+            class="btn small mini-calendar-nav">
+            ←
+        </button>
+
+        <div class="mini-calendar-title">
+            {{ miniCalDate|date('F Y') }}
+        </div>
+
+        <button
+            onclick="location.href='{{ url('slots/calendar-view/' ~ view, {
+                date: miniNextMonth|date('Y-m-d'),
+                year: miniNextMonth|date('Y'),
+                month: miniNextMonth|date('m')
+            }) }}'"
+            class="btn small mini-calendar-nav">
+            →
+        </button>
+    </div>
+
+    <div class="mini-calendar-grid">
+        {% set dayHeaders = ['M', 'T', 'W', 'T', 'F', 'S', 'S'] %}
+        {% for day in dayHeaders %}
+            <div class="mini-calendar-day-header">{{ day }}</div>
+        {% endfor %}
+
+        {% set firstDay = miniCalDate|date_modify('first day of this month') %}
+        {% set firstDayOfWeek = firstDay.format('N') %}{# PHP DateTime::format('N'): 1 = Monday, 7 = Sunday. Craft's |date('N') uses ICU numbering which is off by 1. #}
+        {% set daysInMonth = miniCalDate.format('t') %}
+
+        {% for i in 1..(firstDayOfWeek - 1) %}
+            <div class="mini-calendar-day-empty"></div>
+        {% endfor %}
+
+        {% for day in 1..daysInMonth %}
+            {% set dayDate = firstDay|date_modify('+' ~ (day - 1) ~ ' days') %}
+            {% set dayDateStr = dayDate|date('Y-m-d') %}
+            {% set isToday = dayDateStr == now|date('Y-m-d') %}
+            {% set isSelected = dayDateStr == selectedDate|date('Y-m-d') %}
+            {% set hasBookings = bookingCounts[dayDateStr] is defined and bookingCounts[dayDateStr] > 0 %}
+            {% set bookingCount = bookingCounts[dayDateStr] ?? 0 %}
+
+            <a href="{{ url('slots/calendar-view/' ~ view, { date: dayDateStr }) }}"
+               class="mini-calendar-day{% if isSelected %} is-selected{% endif %}{% if isToday %} is-today{% endif %}">
+                {{ day }}
+                {% if hasBookings %}
+                    <span class="mini-calendar-indicator" title="{{ 'calendar.bookingIndicator'|t('slots', { count: bookingCount }) }}"></span>
+                {% endif %}
+            </a>
+        {% endfor %}
+    </div>
+
+    <div class="mini-calendar-footer">
+        <a href="{{ url('slots/calendar-view/' ~ view) }}" class="btn small submit mini-calendar-today-btn">
+            {{ 'calendar.today'|t('slots') }}
+        </a>
+    </div>
+
+    {% if bookingCounts|length > 0 %}
+        {% set totalBookings = 0 %}
+        {% for count in bookingCounts %}
+            {% set totalBookings = totalBookings + count %}
+        {% endfor %}
+
+        <div class="mini-calendar-summary">
+            {{ 'calendar.bookingsThisMonth'|t('slots', { count: totalBookings }) }}
+        </div>
+    {% endif %}
+</div>

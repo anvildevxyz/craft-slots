@@ -1,0 +1,14 @@
+{% extends "_layouts/elementindex" %}
+{% set elementType = 'anvildev\\slots\\elements\\Reservation' %}
+{% set title = 'titles.bookings'|t('slots') %}
+{% set selectedSubnavItem = 'bookings' %}
+
+{# Sources, status filters, sorting, search, the condition filter HUD, element
+   actions and the CSV exporter all come from the Reservation element itself.
+   The table this replaced re-implemented each of them by hand. #}
+
+{% block actionButton %}
+    {% if canManage %}
+        <a class="btn submit add icon" href="{{ url('slots/bookings/new') }}">{{ 'buttons.newBooking'|t('slots') }}</a>
+    {% endif %}
+{% endblock %}

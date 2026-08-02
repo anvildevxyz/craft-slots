@@ -1,0 +1,28 @@
+version: 2
+
+updates:
+  # Composer dependencies — guardrailed for a *library*, where wide version
+  # ranges are intentional and the toolchain is deliberately pinned.
+  - package-ecosystem: composer
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - composer
+    commit-message:
+      prefix: chore
+      prefix-development: chore
+    # One rollup PR for the dev toolchain instead of one PR per package.
+    groups:
+      dev-dependencies:
+        dependency-type: development
+    ignore:
+      # We support the whole ^5.0 range on purpose; don't narrow the floor.
+      - dependency-name: "craftcms/cms"
+      # phpstan/phpstan is capped at ^1.x by craftcms/phpstan (dev-main);
+      # a major bump would break the quality gate. Allow patch/minor only.
+      - dependency-name: "phpstan/phpstan"
+        update-types:
+          - version-update:semver-major

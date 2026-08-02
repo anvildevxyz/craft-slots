@@ -1,0 +1,75 @@
+{% extends "_layouts/cp" %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsCpAsset") %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsCalendarViewAsset") %}
+
+{% set selectedSubnavItem = 'calendar' %}
+{% set title = 'calendar.weekOfDate'|t('slots', { date: startDate|date('short') }) %}
+{% set currentView = 'week' %}
+
+{% set prevWeek = startDate.format('Y-m-d')|date_modify('-7 days') %}
+{% set nextWeek = startDate.format('Y-m-d')|date_modify('+7 days') %}
+
+{% block content %}
+    <div class="slots-calendar-layout">
+        <div>
+            {% include 'slots/calendar/_mini-calendar' with {
+                selectedDate: selectedDate,
+                view: currentView,
+                bookingCounts: bookingCounts
+            } %}
+        </div>
+
+        <div>
+            <div class="slots-calendar-header">
+                <div class="slots-calendar-nav">
+                    <div>
+                        <a href="{{ url('slots/calendar-view/week', { date: prevWeek|date('Y-m-d') }) }}" class="btn">{{ 'calendar.previousWeek'|t('slots') }}</a>
+                        <a href="{{ url('slots/calendar-view/week') }}" class="btn">{{ 'calendar.thisWeek'|t('slots') }}</a>
+                        <a href="{{ url('slots/calendar-view/week', { date: nextWeek|date('Y-m-d') }) }}" class="btn">{{ 'calendar.nextWeek'|t('slots') }}</a>
+                    </div>
+
+                    <div class="slots-view-switcher">
+                        <a href="{{ url('slots/calendar-view/month', { year: startDate|date('Y'), month: startDate|date('m') }) }}"
+                           class="btn{% if currentView == 'month' %} active{% endif %}">
+                            {{ 'calendar.month'|t('slots') }}
+                        </a>
+                        <a href="{{ url('slots/calendar-view/week', { date: startDate|date('Y-m-d') }) }}"
+                           class="btn{% if currentView == 'week' %} active{% endif %}">
+                            {{ 'calendar.week'|t('slots') }}
+                        </a>
+                        <a href="{{ url('slots/calendar-view/day', { date: selectedDate|date('Y-m-d') }) }}"
+                           class="btn{% if currentView == 'day' %} active{% endif %}">
+                            {{ 'calendar.day'|t('slots') }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slots-week-grid">
+                {% for dayKey, dayData in reservationsByDay %}
+                    <div class="slots-week-day">
+                        <div class="slots-week-day-header">
+                            {{ dayData.date|date('D') }}<br>
+                            <span class="slots-week-day-number">{{ dayData.date|date('d') }}</span>
+                        </div>
+
+                        <div class="slots-week-day-content">
+                            {% if dayData.reservations|length > 0 %}
+                                {% for reservation in dayData.reservations %}
+                                    <div class="calendar-booking status-{{ reservation.status }}">
+                                        <div class="calendar-booking-time">{{ reservation.startTime }}</div>
+                                        <div class="calendar-booking-name">
+                                            {{ reservation.customerEmail|slice(0, 20) }}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="slots-week-empty">{{ 'calendar.noBookings'|t('slots') }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

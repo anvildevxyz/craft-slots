@@ -1,0 +1,341 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsCpAsset") %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsBookingsAsset") %}
+
+{% set canManage = canManage ?? true %}
+{% set title = reservation.id ? (canManage ? 'form.editBooking'|t('slots') : 'form.viewBooking'|t('slots')) ~ ' #' ~ reservation.id : 'labels.newBooking'|t('slots') %}
+{% set selectedSubnavItem = 'bookings' %}
+
+{% set fullPageForm = canManage %}
+
+{% set service = reservation.id ? reservation.getService() : null %}
+{% set employee = reservation.id ? reservation.getEmployee() : null %}
+{% set location = reservation.id ? reservation.getLocation() : null %}
+
+{% block actionButton %}
+    {% if canManage %}
+        {% if reservation.id %}
+            <a href="{{ reservation.getIcsUrl() }}" class="btn" data-icon="download">{{ 'account.addToCalendar'|t('slots') }}</a>
+            <div class="btngroup">
+                <button type="submit" class="btn submit">{{ 'Save'|t('app') }}</button>
+                {% if emailEnabled ?? false %}
+                    <button type="button" class="btn menubtn" data-icon="mail"></button>
+                    <div class="menu">
+                        <ul>
+                            <li>
+                                <a class="formsubmit" data-action="slots/cp/bookings/resend-confirmation" data-param="id" data-value="{{ reservation.id }}" data-redirect="{{ ('slots/bookings/' ~ reservation.id)|hash }}">
+                                    {{ 'messages.resendConfirmationEmail'|t('slots') }}
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+        {% else %}
+            <button type="submit" class="btn submit">{{ 'Save'|t('app') }}</button>
+        {% endif %}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="slots-booking-edit{% if not canManage %} slots-readonly{% endif %}">
+    {% if canManage %}
+    <input type="hidden" name="action" value="slots/cp/bookings/save">
+    {% if reservation.id %}
+        <input type="hidden" name="id" value="{{ reservation.id }}">
+    {% endif %}
+    {% endif %}
+
+    <div id="fields">
+        <h2>{{ 'labels.bookingDetails'|t('slots') }}</h2>
+
+        {{ forms.selectField({
+            label: 'labels.service'|t('slots'),
+            id: 'serviceId',
+            name: 'serviceId',
+            options: serviceOptions,
+            value: reservation.serviceId,
+            errors: reservation.getErrors('serviceId'),
+            instructions: 'form.serviceInstructions'|t('slots')
+        }) }}
+
+        <div class="flex-fields">
+            {{ forms.selectField({
+                label: 'labels.employee'|t('slots'),
+                id: 'employeeId',
+                name: 'employeeId',
+                options: employeeOptions,
+                value: reservation.employeeId,
+                errors: reservation.getErrors('employeeId')
+            }) }}
+
+            {{ forms.selectField({
+                label: 'labels.location'|t('slots'),
+                id: 'locationId',
+                name: 'locationId',
+                options: locationOptions,
+                value: reservation.locationId,
+                errors: reservation.getErrors('locationId')
+            }) }}
+        </div>
+
+
+        <hr>
+
+        <h2>{{ 'labels.dateTime'|t('slots') }}</h2>
+
+
+        {{ forms.dateField({
+            label: 'form.bookingDate'|t('slots'),
+            id: 'bookingDate',
+            name: 'bookingDate',
+            value: reservation.bookingDate,
+            required: true,
+            errors: reservation.getErrors('bookingDate')
+        }) }}
+
+        <div class="flex-fields">
+            {{ forms.timeField({
+                label: 'labels.startTime'|t('slots'),
+                id: 'startTime',
+                name: 'startTime',
+                value: reservation.startTime,
+                required: true,
+                errors: reservation.getErrors('startTime')
+            }) }}
+
+            {{ forms.timeField({
+                label: 'form.endTime'|t('slots'),
+                id: 'endTime',
+                name: 'endTime',
+                value: reservation.endTime,
+                required: true,
+                errors: reservation.getErrors('endTime')
+            }) }}
+        </div>
+
+        <div class="flex-fields">
+            {{ forms.textField({
+                label: 'labels.quantity'|t('slots'),
+                id: 'quantity',
+                name: 'quantity',
+                type: 'number',
+                value: reservation.quantity ?? 1,
+                min: 1,
+                required: true,
+                errors: reservation.getErrors('quantity'),
+                instructions: 'form.quantityInstructions'|t('slots')
+            }) }}
+
+            {{ forms.selectField({
+                label: 'labels.status'|t('slots'),
+                id: 'status',
+                name: 'status',
+                options: statuses,
+                value: reservation.status,
+                required: true,
+                errors: reservation.getErrors('status')
+            }) }}
+        </div>
+
+        <hr>
+
+        <h2>{{ 'form.customerInfo'|t('slots') }}</h2>
+
+        {{ forms.textField({
+            label: 'labels.name'|t('slots'),
+            id: 'userName',
+            name: 'userName',
+            value: reservation.userName,
+            required: true,
+            errors: reservation.getErrors('userName')
+        }) }}
+
+        <div class="flex-fields">
+            {{ forms.textField({
+                label: 'labels.email'|t('slots'),
+                id: 'userEmail',
+                name: 'userEmail',
+                type: 'email',
+                value: reservation.userEmail,
+                required: true,
+                errors: reservation.getErrors('userEmail')
+            }) }}
+
+            {{ forms.textField({
+                label: 'labels.phone'|t('slots'),
+                id: 'userPhone',
+                name: 'userPhone',
+                value: reservation.userPhone,
+                errors: reservation.getErrors('userPhone')
+            }) }}
+        </div>
+
+        {{ forms.selectField({
+            label: 'form.timezone'|t('slots'),
+            id: 'userTimezone',
+            name: 'userTimezone',
+            options: timezoneOptions,
+            value: reservation.userTimezone,
+            errors: reservation.getErrors('userTimezone'),
+            instructions: 'form.timezoneInstructions'|t('slots')
+        }) }}
+
+        {{ forms.textareaField({
+            label: 'labels.notes'|t('slots'),
+            id: 'notes',
+            name: 'notes',
+            value: reservation.notes,
+            rows: 4,
+            errors: reservation.getErrors('notes'),
+            instructions: 'form.notesInstructions'|t('slots')
+        }) }}
+
+        {# Session Notes — only visible to admins and assigned employee #}
+        {% if canEditSessionNotes is defined and canEditSessionNotes %}
+            <hr>
+            <h2>{{ 'sessionNotes.heading'|t('slots') }}</h2>
+            <p class="light">{{ 'sessionNotes.description'|t('slots') }}</p>
+
+            {{ forms.textareaField({
+                label: 'sessionNotes.label'|t('slots'),
+                id: 'sessionNotes',
+                name: 'sessionNotes',
+                value: reservation.sessionNotes ?? '',
+                rows: 6,
+                instructions: 'sessionNotes.instructions'|t('slots'),
+            }) }}
+        {% endif %}
+
+        {% if reservation is instance of('craft\\base\\Element') %}
+            {% set fieldLayout = reservation.getFieldLayout() %}
+            {% if fieldLayout and fieldLayout.getTabs()|length %}
+                <hr>
+                {% set form = fieldLayout.createForm(reservation, false) %}
+                {{ form.render()|raw }}
+            {% endif %}
+        {% endif %}
+    </div>
+
+    {% if reservation.id %}
+    <div id="booking-details">
+        <h2>{{ 'form.bookingSummary'|t('slots') }}</h2>
+
+        <div class="booking-card">
+            <div class="booking-row">
+                {% if service %}
+                <div class="booking-item">
+                    <span class="booking-label">{{ 'labels.service'|t('slots') }}</span>
+                    <span class="booking-value">{{ service.title }}</span>
+                    {% if service.duration or service.price %}
+                    <span class="booking-meta">
+                        {% if service.duration %}{{ service.duration }} {{ 'labels.min'|t('slots') }}{% endif %}
+                        {% if service.duration and service.price %} · {% endif %}
+                        {% if service.price %}{{ service.price|currency(currency) }}{% endif %}
+                    </span>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if employee %}
+                <div class="booking-item">
+                    <span class="booking-label">{{ 'labels.employee'|t('slots') }}</span>
+                    {% set employeeUser = employee.getUser() %}
+                    <span class="booking-value">{{ employeeUser ? employeeUser.getName() : employee.title }}</span>
+                </div>
+                {% endif %}
+
+                {% if location %}
+                <div class="booking-item">
+                    <span class="booking-label">{{ 'labels.location'|t('slots') }}</span>
+                    <span class="booking-value">{{ location.title }}</span>
+                    {% if location.address %}
+                    <span class="booking-meta">{{ location.address }}</span>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+
+            <div class="booking-summary">
+                {% if service and service.price %}
+                <div class="summary-row">
+                    <span>{{ 'labels.service'|t('slots') }}</span>
+                    <span>{{ service.price|currency(currency) }}</span>
+                </div>
+                {% endif %}
+                {% if order is defined and order and order.totalTax > 0 %}
+                <div class="summary-row">
+                    <span>{{ 'labels.subtotal'|t('slots') }}</span>
+                    <span>{{ reservation.getTotalPrice()|currency(currency) }}</span>
+                </div>
+                <div class="summary-row">
+                    <span>{{ 'labels.tax'|t('slots') }}</span>
+                    <span>{{ order.totalTax|currency(currency) }}</span>
+                </div>
+                <div class="summary-row total">
+                    <span>{{ 'labels.totalPrice'|t('slots') }}</span>
+                    <span>{{ order.totalPrice|currency(currency) }}</span>
+                </div>
+                {% else %}
+                <div class="summary-row total">
+                    <span>{{ 'labels.totalPrice'|t('slots') }}</span>
+                    <span>{{ reservation.getTotalPrice()|currency(currency) }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if payment is defined and payment %}
+        <div class="slots-payment-panel">
+            <h3>{{ 'payment.panelHeading'|t('slots') }}</h3>
+            <div class="summary-row">
+                <span>{{ 'payment.statusLabel'|t('slots') }}</span>
+                <span class="slots-payment-status slots-payment-status--{{ payment.status }}">{{ ('payment.status.' ~ payment.status)|t('slots') }}</span>
+            </div>
+            <div class="summary-row">
+                <span>{{ 'payment.amountCaptured'|t('slots') }}</span>
+                <span>{{ payment.amount|currency(payment.currency) }}</span>
+            </div>
+            {% if payment.refunded > 0 %}
+            <div class="summary-row">
+                <span>{{ 'payment.amountRefunded'|t('slots') }}</span>
+                <span>−{{ payment.refunded|currency(payment.currency) }}</span>
+            </div>
+            {% endif %}
+            <div class="summary-row">
+                <span>{{ 'payment.gatewayLabel'|t('slots') }}</span>
+                <span>
+                    {{ payment.gateway|capitalize }}
+                    {% if payment.dashboardUrl %} — <a href="{{ payment.dashboardUrl }}" target="_blank" rel="noopener">{{ payment.externalId }}</a>
+                    {% elseif payment.externalId %} — <code>{{ payment.externalId }}</code>
+                    {% endif %}
+                </span>
+            </div>
+            {% if payment.canRefund %}
+            <form method="post" class="slots-refund-form">
+                {{ csrfInput() }}
+                {{ actionInput('slots/bookings/refund') }}
+                {{ hiddenInput('id', reservation.id) }}
+                {{ redirectInput(craft.app.request.pathInfo) }}
+                <label class="slots-refund-amount">
+                    {{ 'payment.refundAmountLabel'|t('slots') }}
+                    <input type="number" name="amount" step="0.01" min="0.01" max="{{ payment.maxRefund }}" placeholder="{{ payment.maxRefund }}">
+                </label>
+                <p class="slots-refund-hint light">{{ 'payment.maxRefundable'|t('slots', { amount: payment.maxRefund|currency(payment.currency) }) }}</p>
+                <button type="submit" class="btn submit">{{ 'payment.refundButton'|t('slots') }}</button>
+            </form>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="booking-meta-info">
+            <span>{{ 'form.created'|t('slots') }}: {{ reservation.dateCreated|date('d.m.Y H:i') }}</span>
+            <span class="separator">·</span>
+            <span>Token: <code>{{ reservation.confirmationToken }}</code></span>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

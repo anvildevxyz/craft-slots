@@ -1,0 +1,15 @@
+<svg width="237" height="237" viewBox="0 0 237 237" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="237" height="237" rx="25" fill="#1F262A"/>
+<path d="M160.667 81.5H77.3333C72.731 81.5 69 85.231 69 89.8333V159.278C69 163.88 72.731 167.611 77.3333 167.611H160.667C165.269 167.611 169 163.88 169 159.278V89.8333C169 85.231 165.269 81.5 160.667 81.5Z" stroke="white" stroke-width="4"/>
+<path opacity="0.3" d="M160.667 81.5H77.3333C72.731 81.5 69 85.231 69 89.8333V98.1667C69 102.769 72.731 106.5 77.3333 106.5H160.667C165.269 106.5 169 102.769 169 98.1667V89.8333C169 85.231 165.269 81.5 160.667 81.5Z" fill="white"/>
+<path d="M96.7778 69V88.4444" stroke="white" stroke-width="4" stroke-linecap="round"/>
+<path d="M141.222 69V88.4444" stroke="white" stroke-width="4" stroke-linecap="round"/>
+<g opacity="0.32" fill="white">
+<rect x="83" y="120" width="21" height="15" rx="4"/>
+<rect x="110" y="120" width="21" height="15" rx="4"/>
+<rect x="137" y="120" width="21" height="15" rx="4"/>
+<rect x="83" y="143" width="21" height="15" rx="4"/>
+<rect x="137" y="143" width="21" height="15" rx="4"/>
+</g>
+<rect x="110" y="143" width="21" height="15" rx="4" fill="white"/>
+</svg>

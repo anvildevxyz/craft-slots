@@ -1,0 +1,82 @@
+{
+    "name": "anvildev/craft-slots",
+    "description": "Straightforward appointment booking for Craft CMS, with Stripe payments and no Commerce required",
+    "type": "craft-plugin",
+    "version": "1.0.0",
+    "keywords": [
+        "craft",
+        "cms",
+        "craftcms",
+        "craft-plugin",
+        "slots",
+        "booking",
+        "appointments",
+        "scheduling",
+        "stripe"
+    ],
+    "support": {
+        "docs": "https://github.com/anvildevxyz/craft-slots/blob/main/README.md",
+        "issues": "https://github.com/anvildevxyz/craft-slots/issues",
+        "source": "https://github.com/anvildevxyz/craft-slots"
+    },
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "anvildev",
+            "homepage": "https://anvildev.xyz"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "craftcms/cms": "^5.0",
+        "stripe/stripe-php": "^21.0"
+    },
+    "require-dev": {
+        "craftcms/phpstan": "dev-main",
+        "phpstan/phpstan": "^1.10.0",
+        "craftcms/ecs": "dev-main",
+        "craftcms/rector": "dev-main",
+        "phpunit/phpunit": "^9.5",
+        "mockery/mockery": "^1.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "anvildev\\slots\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "anvildev\\slots\\tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "phpstan": "phpstan analyse --memory-limit=512M",
+        "ecs": "ecs check --fix",
+        "ecs:check": "ecs check",
+        "rector": "rector process --dry-run",
+        "rector:fix": "rector process",
+        "test": "phpunit",
+        "test:coverage": "phpunit --coverage-html coverage",
+        "check": [
+            "@ecs:check",
+            "@phpstan"
+        ]
+    },
+    "extra": {
+        "name": "Slots",
+        "handle": "slots",
+        "developer": "Anvildev",
+        "developerUrl": "https://anvildev.xyz",
+        "class": "anvildev\\slots\\Slots"
+    },
+    "config": {
+        "allow-plugins": {
+            "yiisoft/yii2-composer": true,
+            "craftcms/plugin-installer": true,
+            "php-http/discovery": true,
+            "tbachert/spi": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

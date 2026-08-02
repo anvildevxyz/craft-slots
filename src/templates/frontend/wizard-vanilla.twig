@@ -1,0 +1,255 @@
+{# ==========================================================================
+   Slots — vanilla booking wizard (zero-dependency, CSP-safe)
+
+   Renders the wizard shell with the `data-slots-*` contract consumed by the
+   slots-wizard bundle. Configuration is emitted as a non-executable JSON block
+   (`<script type="application/json">`) and read by the bundle's auto-init, so
+   the page needs no inline executable script and runs under a strict CSP.
+
+   CSP note: with direct payments, the payment step loads Stripe
+   Elements — https://js.stripe.com plus Stripe-hosted iframes. Direct-payment
+   pages must allow Stripe in their CSP (script-src/frame-src js.stripe.com,
+   connect-src api.stripe.com). Free bookings stay fully self-contained.
+
+   Include params (all optional): serviceId, labels {}.
+   ========================================================================== #}
+
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsWizardAsset") %}
+
+{% set settings = craft.slots.getSettings() %}
+{% set captchaProvider = settings.captchaProvider %}
+{% set captchaSiteKey = captchaProvider == 'recaptcha' ? settings.recaptchaSiteKey
+    : (captchaProvider == 'hcaptcha' ? settings.hcaptchaSiteKey
+    : (captchaProvider == 'turnstile' ? settings.turnstileSiteKey : null)) %}
+{% set captchaEnabled = settings.enableCaptcha and captchaSiteKey %}
+{% set labels = {
+    selectService: 'wizard.selectService'|t('slots'),
+    selectLocation: 'wizard.selectLocation'|t('slots'),
+    selectEmployee: 'wizard.selectEmployee'|t('slots'),
+    selectDateTime: 'wizard.selectDateTime'|t('slots'),
+    enterInfo: 'wizard.enterInfo'|t('slots'),
+    confirmBooking: 'wizard.confirmBooking'|t('slots'),
+    next: 'wizard.btnNext'|t('slots'),
+    back: 'wizard.btnBack'|t('slots'),
+    book: 'wizard.btnBook'|t('slots'),
+    name: 'labels.name'|t('slots'),
+    email: 'labels.email'|t('slots'),
+    phone: 'labels.phone'|t('slots'),
+    notes: 'labels.notes'|t('slots'),
+    success: 'wizard.successTitle'|t('slots'),
+}|merge(labels ?? {}) %}
+
+{# Runtime strings the JS core emits itself (announcements, countdown, errors,
+   validation). Keyed by the core's i18n keys; localized here so they follow the
+   site language instead of the core's hardcoded English defaults. #}
+{% set wizardMessages = {
+    'announce.stepChanged': 'announce.stepChanged'|t('slots'),
+    'lock.expiring': 'lock.expiring'|t('slots'),
+    'lock.expired': 'lock.expired'|t('slots'),
+    'calendar.prevMonth': 'calendar.prevMonth'|t('slots'),
+    'calendar.nextMonth': 'calendar.nextMonth'|t('slots'),
+    'slot.seatsAvailable': 'slot.seatsAvailable'|t('slots'),
+    'error.generic': 'error.generic'|t('slots'),
+    'error.booking': 'error.booking'|t('slots'),
+    'error.slotReserved': 'error.slotReserved'|t('slots'),
+    'payment.preparing': 'payment.preparing'|t('slots'),
+    'payment.processing': 'payment.processing'|t('slots'),
+    'payment.finalizing': 'payment.finalizing'|t('slots'),
+    'payment.unavailable': 'payment.unavailable'|t('slots'),
+    'payment.failed': 'payment.failed'|t('slots'),
+    'validation.serviceRequired': 'validation.serviceRequired'|t('slots'),
+    'validation.slotRequired': 'validation.slotRequired'|t('slots'),
+    'validation.nameRequired': 'validation.nameRequired'|t('slots'),
+    'validation.emailRequired': 'validation.emailRequired'|t('slots'),
+    'validation.emailInvalid': 'validation.emailInvalid'|t('slots'),
+    'validation.phoneRequired': 'validation.phoneRequired'|t('slots'),
+    'validation.quantityInvalid': 'validation.quantityInvalid'|t('slots'),
+    'validation.quantityTooLow': 'validation.quantityTooLow'|t('slots'),
+    'validation.quantityTooHigh': 'validation.quantityTooHigh'|t('slots'),
+} %}
+
+{# `serviceId` falls back to a query param like every other preselect below it.
+   Without that a link could set the location, staff member, date and time but
+   not the service itself. It is validated server-side like any other value. #}
+{% set slotsConfig = {
+    api: {
+        baseUrl: '/slots/api/v1',
+        site: craft.app.sites.currentSite.handle,
+        csrf: {
+            name: craft.app.config.general.csrfTokenName,
+            value: craft.app.request.csrfToken,
+        },
+    },
+    config: {
+        requirePhone: requirePhone ?? false,
+        showNotes: showNotes ?? true,
+        defaultQuantity: defaultQuantity ?? 1,
+        maximumAdvanceBookingDays: settings.maximumAdvanceBookingDays,
+        siteHandle: craft.app.sites.currentSite.handle,
+        paymentMode: settings.getPaymentMode(),
+    },
+    serviceId: serviceId ?? craft.app.request.getParam('serviceId'),
+    locationId: locationId ?? craft.app.request.getParam('locationId'),
+    employeeId: employeeId ?? craft.app.request.getParam('employeeId'),
+    date: date ?? craft.app.request.getParam('date'),
+    time: time ?? craft.app.request.getParam('time'),
+    conversionToken: craft.app.request.getParam('conversionToken'),
+    captcha: captchaEnabled ? {
+        provider: captchaProvider,
+        siteKey: captchaSiteKey,
+        action: settings.recaptchaAction ?? 'booking',
+    } : null,
+    locale: craft.app.language,
+    messages: wizardMessages,
+} %}
+
+<div data-slots-wizard data-slots-auto class="slots-wizard" role="region" aria-label="{{ 'wizard.ariaBookingWizard'|t('slots') }}">
+    {# Encode with JSON_HEX_* so `<`, `>`, `&`, quotes can never break out of this
+       inline script block, independent of json_encode's default slash-escaping. #}
+    <script type="application/json" data-slots-config>{{ slotsConfig|json_encode(constant('JSON_HEX_TAG') b-or constant('JSON_HEX_APOS') b-or constant('JSON_HEX_AMP') b-or constant('JSON_HEX_QUOT'))|raw }}</script>
+
+    {% set honeypotName = craft.slots.getSettings().honeypotFieldName ?? null %}
+    {% if honeypotName %}
+        {# Honeypot: visually hidden, off the tab order — bots fill it, humans don't. #}
+        <input type="text" data-slots-honeypot name="{{ honeypotName }}" class="slots-sr-only" tabindex="-1" autocomplete="off" aria-hidden="true">
+    {% endif %}
+
+    {# --- Chrome ----------------------------------------------------------- #}
+    {# Progress bar first so it sits flush at the top; loading/error render
+       below it in the content area (never above the bar). #}
+    <div class="slots-progress" data-slots-progress role="progressbar" aria-valuemin="1" aria-label="{{ 'wizard.ariaStepNav'|t('slots') }}">
+        <span data-slots-progress-current>1</span>&nbsp;/&nbsp;<span data-slots-progress-total></span>
+    </div>
+    <div data-slots-loading hidden>{{ 'wizard.loadingServices'|t('slots') }}</div>
+    <p data-slots-error role="alert" hidden></p>
+    <div class="slots-sr-only" aria-live="polite" data-slots-live></div>
+
+    {# --- Steps ------------------------------------------------------------ #}
+    <section data-slots-step="service">
+        <h2 data-slots-step-heading>{{ labels.selectService }}</h2>
+        <template data-slots-template="service-card">
+            <button type="button" data-slots-action="select-service" class="slots-card">
+                <span class="slots-card__name" data-slots-field="name"></span>
+                <span class="slots-card__price" data-slots-field="price"></span>
+            </button>
+        </template>
+        <div class="slots-cards" data-slots-list="services"></div>
+        <div class="slots-nav">
+            <button type="button" data-slots-action="next">{{ labels.next }}</button>
+        </div>
+    </section>
+
+
+    <section data-slots-step="location" hidden>
+        <h2 data-slots-step-heading>{{ labels.selectLocation }}</h2>
+        <template data-slots-template="location-card">
+            <button type="button" data-slots-action="select-location" class="slots-card">
+                <span class="slots-card__name" data-slots-field="name"></span>
+            </button>
+        </template>
+        <div class="slots-cards" data-slots-list="locations"></div>
+        <div class="slots-nav">
+            <button type="button" data-slots-action="back">{{ labels.back }}</button>
+            <button type="button" data-slots-action="next">{{ labels.next }}</button>
+        </div>
+    </section>
+
+    <section data-slots-step="employee" hidden>
+        <h2 data-slots-step-heading>{{ labels.selectEmployee }}</h2>
+        <template data-slots-template="employee-card">
+            <button type="button" data-slots-action="select-employee" class="slots-card">
+                <span class="slots-card__name" data-slots-field="name"></span>
+                <span class="slots-card__bio" data-slots-field="bio"></span>
+            </button>
+        </template>
+        <div class="slots-cards" data-slots-list="employees"></div>
+        <div class="slots-nav">
+            <button type="button" data-slots-action="back">{{ labels.back }}</button>
+            <button type="button" data-slots-action="next">{{ labels.next }}</button>
+        </div>
+    </section>
+
+    <section data-slots-step="datetime" hidden>
+        <h2 data-slots-step-heading>{{ labels.selectDateTime }}</h2>
+        <div class="slots-calendar" data-slots-calendar></div>
+        <div class="slots-slots" data-slots-slots aria-label="{{ 'wizard.selectTime'|t('slots') }}"></div>
+        <div class="slots-quantity" data-slots-slot-quantity hidden>
+            <span id="slots-qty-label">{{ 'wizard.quantityLabel'|t('slots') }}</span>
+            <button type="button" data-slots-action="qty-decrement" aria-describedby="slots-qty-label" aria-label="{{ 'wizard.ariaDecreaseQuantity'|t('slots') }}">−</button>
+            <output data-slots-slot-qty-value aria-live="polite">1</output>
+            <button type="button" data-slots-action="qty-increment" aria-describedby="slots-qty-label" aria-label="{{ 'wizard.ariaIncreaseQuantity'|t('slots') }}">+</button>
+        </div>
+        <div class="slots-nav">
+            <button type="button" data-slots-action="back">{{ labels.back }}</button>
+            <button type="button" data-slots-action="next">{{ labels.next }}</button>
+        </div>
+    </section>
+
+    <section data-slots-step="info" hidden>
+        <h2 data-slots-step-heading>{{ labels.enterInfo }}</h2>
+        <label>{{ labels.name }}<input type="text" data-slots-field="name" autocomplete="name" aria-required="true"></label>
+        <p class="slots-field-error" id="slots-err-name" data-slots-field-error="name" hidden></p>
+        <label>{{ labels.email }}<input type="email" data-slots-field="email" autocomplete="email" aria-required="true"></label>
+        <p class="slots-field-error" id="slots-err-email" data-slots-field-error="email" hidden></p>
+        <label>{{ labels.phone }}<input type="tel" data-slots-field="phone" autocomplete="tel"></label>
+        <p class="slots-field-error" id="slots-err-phone" data-slots-field-error="phone" hidden></p>
+        <label>{{ labels.notes }}<textarea data-slots-field="notes"></textarea></label>
+        <div class="slots-nav">
+            <button type="button" data-slots-action="back">{{ labels.back }}</button>
+            <button type="button" data-slots-action="next">{{ labels.next }}</button>
+        </div>
+    </section>
+
+    <section data-slots-step="review" hidden>
+        <h2 data-slots-step-heading>{{ labels.confirmBooking }}</h2>
+        <dl class="slots-summary">
+            <dt>{{ 'labels.service'|t('slots') }}</dt><dd data-slots-summary="service"></dd>
+            <dt>{{ 'labels.employee'|t('slots') }}</dt><dd data-slots-summary="employee"></dd>
+            <dt>{{ 'labels.location'|t('slots') }}</dt><dd data-slots-summary="location"></dd>
+            <dt>{{ 'labels.date'|t('slots') }}</dt><dd data-slots-summary="date"></dd>
+            <dt>{{ 'labels.time'|t('slots') }}</dt><dd data-slots-summary="time"></dd>
+            <dt>{{ 'labels.duration'|t('slots') }}</dt><dd data-slots-summary="duration"></dd>
+            <dt>{{ 'wizard.summaryQuantity'|t('slots') }}</dt><dd data-slots-summary="quantity"></dd>
+            <dt>{{ labels.name }}</dt><dd data-slots-summary="customer-name"></dd>
+            <dt>{{ labels.email }}</dt><dd data-slots-summary="customer-email"></dd>
+            <dt>{{ 'wizard.summaryTotal'|t('slots') }}</dt><dd data-slots-summary="total"></dd>
+        </dl>
+        <p class="slots-payment-notice" data-slots-payment-notice hidden>{{ 'wizard.paymentRequired'|t('slots') }}</p>
+        {% if captchaEnabled %}
+            <div class="slots-captcha" data-slots-captcha></div>
+            <input type="hidden" data-slots-captcha-token>
+        {% endif %}
+        <div class="slots-nav">
+            <button type="button" data-slots-action="back">{{ labels.back }}</button>
+            <button type="button" data-slots-action="submit">{{ labels.book }}</button>
+        </div>
+    </section>
+
+    <section data-slots-step="payment" hidden>
+        <h2 data-slots-step-heading>{{ 'wizard.paymentHeading'|t('slots') }}</h2>
+        <p>{{ 'wizard.paymentRequiredNote'|t('slots') }}</p>
+        {# Stripe.js mounts the Payment Element (card fields) inside this target. #}
+        <div class="slots-payment-element" data-slots-payment-element></div>
+        <p class="slots-payment-status" data-slots-payment-status role="status" aria-live="polite"></p>
+        <p class="slots-payment-error" data-slots-payment-error role="alert" hidden></p>
+        <div class="slots-nav">
+            <button type="button" data-slots-action="pay" disabled>{{ 'wizard.btnPay'|t('slots') }}</button>
+        </div>
+    </section>
+
+    <section data-slots-step="success" hidden>
+        <div class="slots-success" role="status">
+            <h2 data-slots-step-heading>{{ labels.success }}</h2>
+            <p>{{ 'wizard.successMessage'|t('slots') }}</p>
+            <dl class="slots-summary">
+                <dt>{{ 'wizard.successStatus'|t('slots') }}</dt><dd data-slots-summary="status"></dd>
+                <dt>{{ 'wizard.successBookingId'|t('slots') }}</dt><dd>#<span data-slots-summary="booking-id"></span></dd>
+                <dt>{{ 'wizard.successAppointment'|t('slots') }}</dt><dd data-slots-summary="appointment"></dd>
+            </dl>
+            <p class="slots-success__note">
+                {{ 'wizard.successNextSteps'|t('slots') }}
+                {{ 'wizard.successEmailNotePrefix'|t('slots') }}<strong data-slots-summary="customer-email"></strong>{{ 'wizard.successEmailNoteSuffix'|t('slots') }}
+            </p>
+        </div>
+    </section>
+</div>

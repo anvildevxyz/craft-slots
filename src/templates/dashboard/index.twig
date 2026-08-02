@@ -1,0 +1,244 @@
+{% extends "_layouts/cp" %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsCpAsset") %}
+
+{% set title = "dashboard.title"|t('slots') %}
+
+{% macro sparkline(data, colorClass) %}
+    {% if data|length > 1 %}
+        {% set maxVal = max(data) > 0 ? max(data) : 1 %}
+        {% set width = 100 %}
+        {% set height = 32 %}
+        {% set pointCount = data|length %}
+        {% set points = [] %}
+        {% for i, val in data %}
+            {% set x = (i / (pointCount - 1)) * width %}
+            {% set y = height - ((val / maxVal) * (height - 4)) - 2 %}
+            {% set points = points|merge([x ~ ',' ~ y]) %}
+        {% endfor %}
+        <svg viewBox="0 0 {{ width }} {{ height }}" preserveAspectRatio="none">
+            <defs>
+                <linearGradient id="sparkline-gradient-{{ colorClass }}" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:currentColor;stop-opacity:0.3" />
+                    <stop offset="100%" style="stop-color:currentColor;stop-opacity:0.05" />
+                </linearGradient>
+            </defs>
+            <polygon
+                points="0,{{ height }} {{ points|join(' ') }} {{ width }},{{ height }}"
+                fill="url(#sparkline-gradient-{{ colorClass }})"
+                class="sparkline-{{ colorClass }}"
+            />
+            <polyline
+                points="{{ points|join(' ') }}"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="sparkline-{{ colorClass }}"
+            />
+        </svg>
+    {% elseif data|length == 1 %}
+        {# Single data point - show a flat line #}
+        <svg viewBox="0 0 100 32" preserveAspectRatio="none">
+            <line x1="0" y1="16" x2="100" y2="16" stroke="currentColor" stroke-width="2" stroke-dasharray="4,4" />
+        </svg>
+    {% endif %}
+{% endmacro %}
+
+{% macro trend(value, suffix) %}
+    {% if value > 0 %}
+        <span class="slots-kpi-trend trend-up">
+            <span class="slots-kpi-trend-arrow">&#9650;</span>
+            {{ value|number_format(0) }}%{{ suffix|default('') }}
+        </span>
+    {% elseif value < 0 %}
+        <span class="slots-kpi-trend trend-down">
+            <span class="slots-kpi-trend-arrow">&#9660;</span>
+            {{ value|abs|number_format(0) }}%{{ suffix|default('') }}
+        </span>
+    {% else %}
+        <span class="slots-kpi-trend trend-neutral">
+            &mdash; 0%
+        </span>
+    {% endif %}
+{% endmacro %}
+
+{% block content %}
+    <div class="dashboard">
+        {% if nextBooking %}
+            <div class="slots-next-up">
+                <div class="slots-next-up-content">
+                    <div>
+                        <div class="slots-next-up-label">{{ "dashboard.nextUp"|t('slots') }}</div>
+                        <div class="slots-next-up-countdown">{{ nextBooking.countdown }}</div>
+                    </div>
+                    <div class="slots-next-up-divider"></div>
+                    <div class="slots-next-up-details">
+                        <div class="slots-next-up-service">{{ nextBooking.serviceName }}</div>
+                        <div class="slots-next-up-meta">
+                            {% if nextBooking.isToday %}
+                                {{ "dashboard.today"|t('slots') }} {{ "labels.at"|t('slots') }} {{ nextBooking.time }}
+                            {% else %}
+                                {{ nextBooking.date|date('D, M j') }} {{ "labels.at"|t('slots') }} {{ nextBooking.time }}
+                            {% endif %}
+                            &middot; {{ nextBooking.customerName }}
+                        </div>
+                    </div>
+                </div>
+                <div class="slots-next-up-action">
+                    <a href="{{ url('slots/bookings/' ~ nextBooking.id) }}" class="btn">{{ "dashboard.viewDetails"|t('slots') }} &rarr;</a>
+                </div>
+            </div>
+        {% else %}
+            <div class="slots-next-up-empty">
+                <div class="slots-next-up-empty-text">{{ "dashboard.noUpcoming"|t('slots') }}</div>
+            </div>
+        {% endif %}
+
+        <div class="slots-grid-4 slots-mb-24">
+            <div class="slots-kpi-card-enhanced">
+                <div class="slots-kpi-header">
+                    <div class="slots-kpi-label">{{ "dashboard.todaysBookings"|t('slots') }}</div>
+                </div>
+                <div class="slots-kpi-main">
+                    <div class="slots-kpi-value-lg">{{ todayBookings }}</div>
+                    {{ _self.trend(todayVsAvg, ' vs avg') }}
+                </div>
+                <div class="slots-kpi-sparkline" style="color: #3b82f6;">
+                    {{ _self.sparkline(todaySparkline, 'blue') }}
+                </div>
+                <div class="slots-kpi-footer-link">
+                    <a href="{{ url('slots/calendar-view/day') }}">{{ "dashboard.viewToday"|t('slots') }} &rarr;</a>
+                </div>
+            </div>
+
+            <div class="slots-kpi-card-enhanced">
+                <div class="slots-kpi-header">
+                    <div class="slots-kpi-label">{{ "dashboard.next7Days"|t('slots') }}</div>
+                </div>
+                <div class="slots-kpi-main">
+                    <div class="slots-kpi-value-lg">{{ upcomingBookings }}</div>
+                    {{ _self.trend(weeklyChange, ' vs last') }}
+                </div>
+                <div class="slots-kpi-sparkline" style="color: #3b82f6;">
+                    {{ _self.sparkline(weeklySparkline, 'blue') }}
+                </div>
+                <div class="slots-kpi-footer-link">
+                    <a href="{{ url('slots/calendar-view/week') }}">{{ "dashboard.viewWeek"|t('slots') }} &rarr;</a>
+                </div>
+            </div>
+
+            <div class="slots-kpi-card-enhanced">
+                <div class="slots-kpi-header">
+                    <div class="slots-kpi-label">{{ "dashboard.repeatCustomers"|t('slots') }}</div>
+                </div>
+                <div class="slots-kpi-main">
+                    <div class="slots-kpi-value-lg">{{ repeatCustomers }}</div>
+                    {{ _self.trend(repeatCustomerChange) }}
+                </div>
+                <div class="slots-kpi-sparkline" style="color: #7c3aed;">
+                    {{ _self.sparkline(repeatCustomerSparkline, 'purple') }}
+                </div>
+            </div>
+
+            <div class="slots-kpi-card-enhanced">
+                <div class="slots-kpi-header">
+                    <div class="slots-kpi-label">{{ "dashboard.thisWeekRevenue"|t('slots') }}</div>
+                </div>
+                <div class="slots-kpi-main">
+                    <div class="slots-kpi-value-lg">{{ weeklyRevenue|number_format(0) }} {{ craft.app.locale.getCurrencySymbol(currency) }}</div>
+                    {{ _self.trend(revenueChange, '') }}
+                </div>
+                <div class="slots-kpi-sparkline" style="color: #059669;">
+                    {{ _self.sparkline(revenueSparkline, 'green') }}
+                </div>
+                <div class="slots-kpi-footer-link">
+                    <a href="{{ url('slots/reports/revenue') }}">{{ "dashboard.viewReport"|t('slots') }} &rarr;</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="slots-grid-2 slots-mb-24">
+            <div class="slots-widget-card">
+                <div class="slots-widget-header">
+                    <h3 class="slots-widget-title">{{ "labels.recentActivity"|t('slots') }}</h3>
+                    <a href="{{ url('slots/bookings') }}" class="btn small">{{ "dashboard.viewAll"|t('slots') }}</a>
+                </div>
+
+                <div class="slots-scrollable">
+                    {% if recentActivity|length > 0 %}
+                        {% for reservation in recentActivity %}
+                            <div class="slots-activity-item">
+                                <div>
+                                    <div class="slots-activity-email">{{ reservation.userName ?? reservation.userEmail }}</div>
+                                    <div class="slots-activity-date">
+                                        {{ reservation.bookingDate|date('M j') }} {{ "labels.at"|t('slots') }} {{ reservation.startTime }}
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="slots-status-badge status-{{ reservation.status }}">
+                                        {{ reservation.status|upper }}
+                                    </span>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="slots-empty-state">
+                            {{ "dashboard.noRecentActivity"|t('slots') }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="slots-widget-card">
+                <div class="slots-widget-header">
+                    <h3 class="slots-widget-title">{{ "dashboard.popularServices"|t('slots') }}</h3>
+                    <a href="{{ url('slots/services') }}" class="btn small">{{ "labels.manage"|t('slots') }}</a>
+                </div>
+
+                {% if popularServices|length > 0 %}
+                    {% for service in popularServices %}
+                        <div class="slots-list-item">
+                            <div class="slots-flex-between slots-mb-12">
+                                <div class="slots-font-medium slots-text-base">{{ service.name }}</div>
+                                <div class="slots-text-lg slots-font-bold slots-color-primary">{{ service.bookings }}</div>
+                            </div>
+                            <div class="slots-progress-bar size-sm">
+                                <div class="slots-progress-fill color-primary" style="width: {{ (service.bookings / popularServices[0].bookings * 100)|round }}%;"></div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="slots-empty-state">
+                        {{ "dashboard.noServicesData"|t('slots') }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+
+        <div class="slots-grid-2">
+            <div class="slots-avg-value-card">
+                <div class="slots-avg-value-icon">
+                    &#36;
+                </div>
+                <div class="slots-avg-value-content">
+                    <div class="slots-avg-value-label">{{ "dashboard.avgBookingValue"|t('slots') }}</div>
+                    <div class="slots-flex" style="align-items: baseline; gap: 12px;">
+                        <div class="slots-avg-value-amount">{{ averageBookingValue|number_format(2) }} {{ craft.app.locale.getCurrencySymbol(currency) }}</div>
+                        {{ _self.trend(avgValueChange, '') }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="slots-quick-actions-card">
+                <div class="slots-quick-actions-title">{{ "dashboard.quickActions"|t('slots') }}</div>
+                <div class="slots-quick-actions-grid">
+                    <a href="{{ url('slots/bookings/new') }}" class="btn submit">{{ "labels.newBooking"|t('slots') }}</a>
+                    <a href="{{ url('slots/calendar-view/month') }}" class="btn">{{ "dashboard.calendarAction"|t('slots') }}</a>
+                    <a href="{{ url('slots/reports') }}" class="btn">{{ "dashboard.reportsAction"|t('slots') }}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

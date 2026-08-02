@@ -1,0 +1,67 @@
+{#
+/**
+ * Booking Card Partial
+ *
+ * Displays a single booking in the account portal.
+ *
+ * Variables:
+ * - booking: The reservation element
+ * - compact: Boolean - if true, shows a compact version (default: false)
+ */
+#}
+
+{% set compact = compact ?? false %}
+{% set isCancelled = booking.status == 'cancelled' %}
+
+<div class="slots-booking-card{% if compact %} card-compact{% endif %}{% if isCancelled %} card-cancelled{% endif %}">
+    <div class="slots-card-stripe stripe-{{ booking.status }}"></div>
+
+    <div class="slots-booking-card-body">
+        <div class="slots-booking-card-top">
+            <p class="slots-booking-service">
+                {% if booking.service %}{{ booking.service.title }}{% else %}{{ 'element.booking'|t('slots') }}{% endif %}
+            </p>
+            <span class="slots-badge badge-{{ booking.status }}">
+                {{ booking.getStatusLabel() }}
+            </span>
+        </div>
+
+        <p class="slots-booking-datetime">
+            {{ booking.getFormattedDateTime() }}
+        </p>
+
+        <div class="slots-booking-card-meta">
+            {% if booking.employee %}
+                <span class="slots-booking-meta-tag">{{ booking.employee.title }}</span>
+            {% endif %}
+            {% if booking.location %}
+                <span class="slots-booking-meta-tag">{{ booking.location.title }}</span>
+            {% endif %}
+            {% if booking.quantity > 1 %}
+                <span class="slots-booking-meta-tag">{{ booking.quantity }}×</span>
+            {% endif %}
+        </div>
+
+        {% if not compact %}
+            <div class="slots-booking-actions">
+                <a href="{{ url('slots/account/' ~ booking.id) }}" class="slots-btn">
+                    {{ 'labels.view'|t('slots') }}
+                </a>
+                {% if booking.canBeCancelled() and not isCancelled %}
+                    <form method="post" action="" class="inline-block">
+                        {{ csrfInput() }}
+                        {{ actionInput('slots/account/cancel') }}
+                        {{ hiddenInput('id', booking.id) }}
+                        {{ redirectInput(craft.app.request.url) }}
+                        <button
+                            type="submit"
+                            onclick="return confirm('{{ 'account.cancelConfirm'|t('slots')|e('js') }}')"
+                            class="slots-btn slots-btn-danger">
+                            {{ 'labels.cancel'|t('slots') }}
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>

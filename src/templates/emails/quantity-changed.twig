@@ -1,0 +1,75 @@
+{% extends 'slots/emails/_base' %}
+
+{% set title = 'emails.quantityChanged.title'|t('slots') %}
+{% set headerIcon = '↕' %}
+{% set headerColor = '#000000' %}
+{% set preheader = 'emails.quantityChanged.preheader'|t('slots', { previousQuantity: previousQuantity, newQuantity: newQuantity }) %}
+
+{% block header %}
+	<div class="email-header">
+		<div style="
+				        display: inline-block;
+				        background-color: #000000;
+				        color: white;
+				        padding: 12px 24px;
+				        font-weight: 900;
+				        font-size: 12px;
+				        text-transform: uppercase;
+				        letter-spacing: 0.1em;
+				        margin-bottom: 16px;
+				    ">
+			↕
+			{{ 'emails.quantityChanged.badge'|t('slots') }}
+		</div>
+		<h1 class="header-title">{{ title }}</h1>
+		<p class="header-subtitle">{{ siteName }}</p>
+	</div>
+{% endblock %}
+
+{% block content %}
+	<p style="font-size: 18px; font-weight: 800; margin-bottom: 12px;">
+		{{ 'emails.hello'|t('slots', { name: userName }) }}
+	</p>
+	<p>
+		{{ 'emails.quantityChanged.intro'|t('slots') }}
+	</p>
+
+	<div class="highlight-box">
+		<div class="highlight-primary">📅
+			{{ formattedDateTime }}
+		</div>
+		{% if serviceName is defined and serviceName %}
+			<div class="highlight-secondary">{{ serviceName }}</div>
+		{% endif %}
+		<div style="margin-top: 16px;">
+			<span class="badge badge-primary">{{ 'element.booking'|t('slots') }}
+				#{{ bookingId }}</span>
+		</div>
+	</div>
+
+	<div class="section">
+		<div class="section-title">{{ 'emails.quantityChanged.details'|t('slots') }}</div>
+		<div class="info-grid">
+			<div class="info-row">
+				<span class="info-label">{{ 'emails.quantityChanged.previousQuantity'|t('slots') }}</span>
+				<span class="info-value">{{ previousQuantity }}</span>
+			</div>
+			<div class="info-row">
+				<span class="info-label">{{ 'emails.quantityChanged.newQuantity'|t('slots') }}</span>
+				<span class="info-value" style="font-weight: 900;">{{ newQuantity }}</span>
+			</div>
+			{% if refundAmount is defined and refundAmount > 0 %}
+				<div class="info-row">
+					<span class="info-label">{{ 'emails.quantityChanged.refundAmount'|t('slots') }}</span>
+					<span class="info-value" style="font-weight: 900;">{{ refundAmount|currency }}</span>
+				</div>
+			{% endif %}
+		</div>
+	</div>
+
+	{% if managementUrl is defined and managementUrl %}
+		<div class="btn-container">
+			<a href="{{ managementUrl }}" class="btn btn-primary">{{ 'emails.common.manageBooking'|t('slots') }}</a>
+		</div>
+	{% endif %}
+{% endblock %}

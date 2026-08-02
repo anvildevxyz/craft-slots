@@ -1,0 +1,9 @@
+{% extends "_layouts/elementindex" %}
+{% set elementType = 'anvildev\\slots\\elements\\Service' %}
+{% set title = 'labels.services'|t('slots') %}
+{% set selectedSubnavItem = 'services' %}
+
+{% block actionButton %}
+    <a class="btn submit add icon" href="{{ url('slots/services/new') }}">{{ 'service.new'|t('slots') }}</a>
+{% endblock %}
+

@@ -1,0 +1,78 @@
+{% extends 'slots/emails/_base' %}
+
+{% set title = 'emails.cancellation.title'|t('slots') %}
+{% set headerIcon = '✕' %}
+{% set headerColor = '#000000' %}
+{% set preheader = 'emails.cancellation.preheader'|t('slots', { date: formattedDateTime }) %}
+
+{% block header %}
+<div class="email-header">
+    <div style="
+        display: inline-block;
+        background-color: #000000;
+        color: white;
+        padding: 12px 24px;
+        font-weight: 900;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 16px;
+    ">
+        ✕ {{ 'emails.cancellation.cancelled'|t('slots') }}
+    </div>
+    <h1 class="header-title">{{ title }}</h1>
+    <p class="header-subtitle">{{ siteName }}</p>
+</div>
+{% endblock %}
+
+{% block content %}
+    <p style="font-size: 18px; font-weight: 800; margin-bottom: 12px;">
+        {{ 'emails.hello'|t('slots', { name: userName }) }}
+    </p>
+    <p>
+        {{ 'emails.cancellation.success'|t('slots') }}
+    </p>
+
+    <div class="highlight-box danger">
+        <div class="highlight-primary" style="text-decoration: line-through;">{{ formattedDateTime }}</div>
+        {% if serviceName is defined and serviceName %}
+        <div class="highlight-secondary" style="text-decoration: line-through; opacity: 0.5;">{{ serviceName }}</div>
+        {% endif %}
+        <div style="margin-top: 16px;">
+            <span class="badge badge-danger">{{ 'element.booking'|t('slots') }} #{{ bookingId }}</span>
+        </div>
+    </div>
+
+    {% if cancellationReason is defined and cancellationReason and cancellationReason|trim != '' %}
+    <div class="section">
+        <div class="section-title">{{ 'emails.cancellation.reason'|t('slots') }}</div>
+        <div style="background-color: #ffffff; border: 2px solid #000000; padding: 20px; color: #000000; font-size: 14px; font-weight: 600;">
+            {{ cancellationReason }}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if cancelledAt is defined %}
+    <div class="section">
+        <div class="info-grid">
+            <div class="info-row">
+                <span class="info-label">{{ 'emails.cancellation.cancelledOn'|t('slots') }}</span>
+                <span class="info-value">{{ formattedCancelledAt }}</span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if reservation is defined %}
+    {% endif %}
+
+    <p style="text-align: center; margin-top: 32px; font-weight: 700;">
+        {{ 'emails.cancellation.makeNewBooking'|t('slots') }}
+    </p>
+
+    {% if bookingPageUrl is defined and bookingPageUrl %}
+    <div class="btn-container">
+        <a href="{{ bookingPageUrl }}" class="btn btn-primary">{{ 'emails.cancellation.button'|t('slots') }}</a>
+    </div>
+    {% endif %}
+{% endblock %}

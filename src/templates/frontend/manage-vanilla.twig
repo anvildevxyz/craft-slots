@@ -1,0 +1,59 @@
+{# ==========================================================================
+   Slots — vanilla booking management (?manage=<token>).
+
+   Self-service view of a single reservation with cancel / reduce / increase.
+   Reads the manage token from the `manage` (or `token`) query param and drives
+   the wizard in `mode: 'manage'`. Same bundle, auto-init and CSP posture as the
+   booking wizard.
+   ========================================================================== #}
+
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsWizardAsset") %}
+
+{% set manageToken = craft.app.request.getParam('manage') ?? craft.app.request.getParam('token') %}
+
+{% set slotsConfig = {
+    mode: 'manage',
+    manageToken: manageToken,
+    api: {
+        baseUrl: '/slots/api/v1',
+        site: craft.app.sites.currentSite.handle,
+        csrf: {
+            name: craft.app.config.general.csrfTokenName,
+            value: craft.app.request.csrfToken,
+        },
+    },
+    locale: craft.app.language,
+} %}
+
+<div data-slots-wizard data-slots-auto class="slots-wizard" role="region" aria-label="{{ 'wizard.ariaBookingWizard'|t('slots') }}">
+    {# Encode with JSON_HEX_* so the reflected manage token can never break out of
+       this inline script block, independent of json_encode's slash-escaping. #}
+    <script type="application/json" data-slots-config>{{ slotsConfig|json_encode(constant('JSON_HEX_TAG') b-or constant('JSON_HEX_APOS') b-or constant('JSON_HEX_AMP') b-or constant('JSON_HEX_QUOT'))|raw }}</script>
+
+    <div data-slots-loading hidden>{{ 'wizard.manageLoading'|t('slots') }}</div>
+    <p data-slots-error role="alert" hidden></p>
+    <div class="slots-sr-only" aria-live="polite" data-slots-live></div>
+
+    <section data-slots-step="manage">
+        <h2 data-slots-step-heading>{{ 'wizard.manageTitle'|t('slots') }}</h2>
+
+        <dl class="slots-summary">
+            <dt>{{ 'labels.service'|t('slots') }}</dt><dd data-slots-manage="service"></dd>
+            <dt>{{ 'labels.dateTime'|t('slots') }}</dt><dd data-slots-manage="datetime"></dd>
+            <dt>{{ 'wizard.manageStatus'|t('slots') }}</dt><dd data-slots-manage="status"></dd>
+            <dt>{{ 'wizard.manageQuantity'|t('slots') }}</dt><dd data-slots-manage="quantity"></dd>
+            <dt>{{ 'labels.customer'|t('slots') }}</dt><dd data-slots-manage="customer"></dd>
+        </dl>
+
+        <div class="slots-manage-actions" data-slots-manage-actions hidden>
+            <div class="slots-quantity">
+                <span id="slots-manage-qty">{{ 'wizard.manageChangeAmount'|t('slots') }}</span>
+                <button type="button" data-slots-action="manage-reduce" aria-describedby="slots-manage-qty" aria-label="{{ 'wizard.manageReduceBtn'|t('slots') }}">−</button>
+                <button type="button" data-slots-action="manage-increase" aria-describedby="slots-manage-qty" aria-label="{{ 'wizard.manageIncreaseBtn'|t('slots') }}">+</button>
+            </div>
+            <button type="button" class="slots-manage-cancel" data-slots-action="manage-cancel">{{ 'wizard.manageCancelBtn'|t('slots') }}</button>
+        </div>
+
+        <p class="slots-manage-cancelled" data-slots-manage-cancelled role="status" hidden>{{ 'wizard.manageCancelled'|t('slots') }}</p>
+    </section>
+</div>

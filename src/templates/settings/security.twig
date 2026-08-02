@@ -1,0 +1,243 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsCpAsset") %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsSettingsAsset") %}
+
+{% set fullPageForm = true %}
+{% set selectedSubnavItem = 'settings' %}
+{% set selectedSettingsSubnavItem = 'security' %}
+{% set title = 'settings.security.title'|t('slots') %}
+
+{% block sidebar %}
+	{% include 'slots/settings/_sidebar' %}
+{% endblock %}
+
+{% block content %}
+	<form method="post" accept-charset="UTF-8" id="settings-form">
+		{{ csrfInput() }}
+		<input type="hidden" name="action" value="slots/cp/settings/save">
+		<input type="hidden" name="tab" value="security">
+		{{ redirectInput('slots/settings/security') }}
+
+		<h2 class="heading first">{{ 'settings.security.title'|t('slots') }}</h2>
+		<p class="light">{{ 'settings.security.description'|t('slots') }}</p>
+		<hr>
+		<h3>{{ 'settings.security.captcha'|t('slots') }}</h3>
+
+		{{ forms.lightswitchField({
+            label: 'settings.security.enableCaptcha'|t('slots'),
+            instructions: 'settings.security.enableCaptchaInstructions'|t('slots'),
+            id: 'enableCaptcha',
+            name: 'settings[enableCaptcha]',
+            on: settings.enableCaptcha,
+            toggle: '#captcha-settings'
+        }) }}
+
+		<div id="captcha-settings" class="{% if not settings.enableCaptcha %}hidden{% endif %}">
+			{{ forms.selectField({
+                label: 'settings.security.captchaProvider'|t('slots'),
+                instructions: 'settings.security.captchaProviderInstructions'|t('slots'),
+                id: 'captchaProvider',
+                name: 'settings[captchaProvider]',
+                value: settings.captchaProvider,
+                options: [
+                    { label: 'settings.security.recaptcha'|t('slots'), value: 'recaptcha' },
+                    { label: 'settings.security.hcaptcha'|t('slots'), value: 'hcaptcha' },
+                    { label: 'settings.security.turnstile'|t('slots'), value: 'turnstile' }
+                ],
+            }) }}
+
+			<div id="recaptcha-settings" class="captcha-provider-settings {% if settings.captchaProvider != 'recaptcha' %}hidden{% endif %}">
+				{{ forms.textField({
+                    label: 'settings.security.recaptchaSiteKey'|t('slots'),
+                    id: 'recaptchaSiteKey',
+                    name: 'settings[recaptchaSiteKey]',
+                    value: settings.recaptchaSiteKey,
+                }) }}
+
+				{{ forms.textField({
+                    label: 'settings.security.recaptchaSecretKey'|t('slots'),
+                    id: 'recaptchaSecretKey',
+                    name: 'settings[recaptchaSecretKey]',
+                    value: settings.recaptchaSecretKey,
+                    class: 'code'
+                }) }}
+
+				{{ forms.textField({
+                    label: 'settings.security.recaptchaScoreThreshold'|t('slots'),
+                    instructions: 'settings.security.recaptchaScoreThresholdInstructions'|t('slots'),
+                    id: 'recaptchaScoreThreshold',
+                    name: 'settings[recaptchaScoreThreshold]',
+                    value: settings.recaptchaScoreThreshold,
+                    type: 'number',
+                    min: 0,
+                    max: 1,
+                    step: 0.1,
+                    size: 5
+                }) }}
+
+				{{ forms.textField({
+                    label: 'settings.security.recaptchaAction'|t('slots'),
+                    instructions: 'settings.security.recaptchaActionInstructions'|t('slots'),
+                    id: 'recaptchaAction',
+                    name: 'settings[recaptchaAction]',
+                    value: settings.recaptchaAction,
+                }) }}
+			</div>
+
+			<div id="hcaptcha-settings" class="captcha-provider-settings {% if settings.captchaProvider != 'hcaptcha' %}hidden{% endif %}">
+				{{ forms.textField({
+                    label: 'settings.security.hcaptchaSiteKey'|t('slots'),
+                    id: 'hcaptchaSiteKey',
+                    name: 'settings[hcaptchaSiteKey]',
+                    value: settings.hcaptchaSiteKey,
+                }) }}
+
+				{{ forms.textField({
+                    label: 'settings.security.hcaptchaSecretKey'|t('slots'),
+                    id: 'hcaptchaSecretKey',
+                    name: 'settings[hcaptchaSecretKey]',
+                    value: settings.hcaptchaSecretKey,
+                    class: 'code'
+                }) }}
+			</div>
+
+			<div id="turnstile-settings" class="captcha-provider-settings {% if settings.captchaProvider != 'turnstile' %}hidden{% endif %}">
+				{{ forms.textField({
+                    label: 'settings.security.turnstileSiteKey'|t('slots'),
+                    id: 'turnstileSiteKey',
+                    name: 'settings[turnstileSiteKey]',
+                    value: settings.turnstileSiteKey,
+                }) }}
+
+				{{ forms.textField({
+                    label: 'settings.security.turnstileSecretKey'|t('slots'),
+                    id: 'turnstileSecretKey',
+                    name: 'settings[turnstileSecretKey]',
+                    value: settings.turnstileSecretKey,
+                    class: 'code'
+                }) }}
+			</div>
+		</div>
+
+		<hr>
+
+		<h3>{{ 'settings.security.rateLimiting'|t('slots') }}</h3>
+
+		{{ forms.lightswitchField({
+            label: 'settings.security.enableRateLimiting'|t('slots'),
+            instructions: 'settings.security.enableRateLimitingInstructions'|t('slots'),
+            id: 'enableRateLimiting',
+            name: 'settings[enableRateLimiting]',
+            on: settings.enableRateLimiting,
+            toggle: '#rate-limit-settings'
+        }) }}
+
+		<div id="rate-limit-settings" class="{% if not settings.enableRateLimiting %}hidden{% endif %}">
+			{{ forms.textField({
+                label: 'settings.security.bookingsPerEmail'|t('slots'),
+                instructions: 'settings.security.bookingsPerEmailInstructions'|t('slots'),
+                id: 'rateLimitPerEmail',
+                name: 'settings[rateLimitPerEmail]',
+                value: settings.rateLimitPerEmail,
+                type: 'number',
+                min: 1
+            }) }}
+		</div>
+
+		{{ forms.lightswitchField({
+            label: 'settings.security.enableIpBlocking'|t('slots'),
+            instructions: 'settings.security.enableIpBlockingInstructions'|t('slots'),
+            id: 'enableIpBlocking',
+            name: 'settings[enableIpBlocking]',
+            on: settings.enableIpBlocking,
+            toggle: '#ip-blocking-settings'
+        }) }}
+
+		<div id="ip-blocking-settings" class="{% if not settings.enableIpBlocking %}hidden{% endif %}">
+			{{ forms.textField({
+                label: 'settings.security.bookingsPerIp'|t('slots'),
+                instructions: 'settings.security.bookingsPerIpInstructions'|t('slots'),
+                id: 'rateLimitPerIp',
+                name: 'settings[rateLimitPerIp]',
+                value: settings.rateLimitPerIp,
+                type: 'number',
+                min: 1
+            }) }}
+
+			{{ forms.textareaField({
+                label: 'settings.security.blockedIps'|t('slots'),
+                instructions: 'settings.security.blockedIpsInstructions'|t('slots'),
+                id: 'blockedIps',
+                name: 'settings[blockedIps]',
+                value: settings.blockedIps,
+                rows: 5
+            }) }}
+		</div>
+
+		<hr>
+
+		<h3>{{ 'settings.security.spamProtection'|t('slots') }}</h3>
+
+		<div class="field">
+			<div class="heading">
+				<label>{{ 'settings.security.enableCsrf'|t('slots') }}</label>
+				<div class="instructions">
+					<p>{{ 'settings.security.csrfAlwaysEnabled'|t('slots') }}</p>
+				</div>
+			</div>
+		</div>
+
+		{{ forms.lightswitchField({
+            label: 'settings.security.enableHoneypot'|t('slots'),
+            instructions: 'settings.security.enableHoneypotInstructions'|t('slots'),
+            id: 'enableHoneypot',
+            name: 'settings[enableHoneypot]',
+            on: settings.enableHoneypot,
+            toggle: '#honeypot-settings'
+        }) }}
+
+		<div id="honeypot-settings" class="{% if not settings.enableHoneypot %}hidden{% endif %}">
+			{{ forms.textField({
+                label: 'settings.security.honeypotFieldName'|t('slots'),
+                instructions: 'settings.security.honeypotFieldNameInstructions'|t('slots'),
+                id: 'honeypotFieldName',
+                name: 'settings[honeypotFieldName]',
+                value: settings.honeypotFieldName
+            }) }}
+		</div>
+
+		{{ forms.lightswitchField({
+            label: 'settings.security.enableTimeLimits'|t('slots'),
+            instructions: 'settings.security.enableTimeLimitsInstructions'|t('slots'),
+            id: 'enableTimeBasedLimits',
+            name: 'settings[enableTimeBasedLimits]',
+            on: settings.enableTimeBasedLimits,
+            toggle: '#time-limit-settings'
+        }) }}
+
+		<div id="time-limit-settings" class="{% if not settings.enableTimeBasedLimits %}hidden{% endif %}">
+			{{ forms.textField({
+                label: 'settings.security.minSubmissionTime'|t('slots'),
+                instructions: 'settings.security.minSubmissionTimeInstructions'|t('slots'),
+                id: 'minimumSubmissionTime',
+                name: 'settings[minimumSubmissionTime]',
+                value: settings.minimumSubmissionTime,
+                type: 'number',
+                min: 0
+            }) }}
+		</div>
+
+		<hr>
+
+		<h3>{{ 'settings.security.auditLogging'|t('slots') }}</h3>
+
+		{{ forms.lightswitchField({
+            label: 'settings.security.enableAuditLog'|t('slots'),
+            instructions: 'settings.security.enableAuditLogInstructions'|t('slots'),
+            id: 'enableAuditLog',
+            name: 'settings[enableAuditLog]',
+            on: settings.enableAuditLog
+        }) }}
+	</form>
+{% endblock %}

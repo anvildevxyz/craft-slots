@@ -1,0 +1,135 @@
+{#
+/**
+ * My Bookings - Customer Portal Template
+ * 
+ * Displays all bookings for the currently logged-in user.
+ * Accessed via: /account/bookings
+ * 
+ * Variables:
+ * - user: The current Craft user
+ * - upcomingBookings: Array of future bookings
+ * - pastBookings: Array of past bookings
+ * - allBookings: All bookings combined
+ */
+#}
+
+{% extends "_layout" %}
+
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsAsset") %}
+
+{% set bodyClass = 'page-my-bookings' %}
+
+{% block content %}
+<main id="main" class="main-content" role="main" tabindex="0">
+    <div class="slots-wizard">
+
+        {% if craft.app.session.hasFlash('notice') %}
+            <div class="slots-flash">
+                <p>{{ craft.app.session.getFlash('notice') }}</p>
+            </div>
+        {% endif %}
+
+        {% if craft.app.session.hasFlash('error') %}
+            <div class="slots-flash flash-error">
+                <p>{{ craft.app.session.getFlash('error') }}</p>
+            </div>
+        {% endif %}
+
+        <div class="slots-account-header">
+            <h3>{{ 'frontend.myBookings'|t('slots') }}</h3>
+            <p>{{ 'Welcome, {name}'|t('slots', { name: user.friendlyName }) }}</p>
+        </div>
+
+        {% if upcomingBookings|length %}
+            <div class="slots-section">
+                <h4 class="slots-section-title">
+                    {{ 'account.upcomingBookings'|t('slots') }}
+                    <span>({{ upcomingBookings|length }})</span>
+                </h4>
+
+                {% for booking in upcomingBookings %}
+                    <div class="slots-booking-card">
+                        <div class="slots-booking-card-inner">
+                            <div>
+                                <p class="slots-booking-service">
+                                    {% if booking.service %}{{ booking.service.title }}{% else %}{{ 'element.booking'|t('slots') }}{% endif %}
+                                </p>
+                                <p class="slots-booking-datetime">
+                                    {{ booking.getFormattedDateTime() }}
+                                </p>
+                                {% if booking.employee %}
+                                    <p class="slots-booking-meta">
+                                        {{ 'frontend.with'|t('slots') }} {{ booking.employee.title }}
+                                    </p>
+                                {% endif %}
+                                {% if booking.location %}
+                                    <p class="slots-booking-meta">
+                                        {{ booking.location.title }}
+                                    </p>
+                                {% endif %}
+                            </div>
+                            <div class="slots-text-right">
+                                <span class="slots-badge badge-{{ booking.status }}">
+                                    {{ booking.getStatusLabel() }}
+                                </span>
+                                <div class="slots-booking-actions">
+                                    <a href="{{ booking.getIcsUrl() }}" class="slots-btn">
+                                        {{ 'account.addToCalendar'|t('slots') }}
+                                    </a>
+                                    <a href="{{ booking.getManagementUrl() }}" class="slots-btn">
+                                        {{ 'labels.manage'|t('slots') }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if upcomingBookings|length == 0 %}
+            <div class="slots-section section-soft">
+                <div class="slots-empty">
+                    <p>{{ 'account.noUpcomingBookings'|t('slots') }}</p>
+                    <a href="/booking" class="slots-btn slots-btn-lg slots-btn-primary">
+                        {{ 'frontend.bookNow'|t('slots') }}
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if pastBookings|length %}
+            <div class="slots-section section-plain">
+                <h4 class="slots-section-title-sm">
+                    {{ 'account.pastBookings'|t('slots') }}
+                    <span>({{ pastBookings|length }})</span>
+                </h4>
+
+                {% for booking in pastBookings %}
+                    <div class="slots-booking-card card-compact">
+                        <div class="slots-booking-card-inner">
+                            <div>
+                                <p class="slots-booking-service">
+                                    {% if booking.service %}{{ booking.service.title }}{% else %}{{ 'element.booking'|t('slots') }}{% endif %}
+                                </p>
+                                <p class="slots-booking-meta">
+                                    {{ booking.getFormattedDateTime() }}
+                                </p>
+                            </div>
+                            <div>
+                                <span class="slots-badge {% if booking.status == 'cancelled' %}badge-cancelled{% else %}badge-completed{% endif %}">
+                                    {% if booking.status == 'cancelled' %}
+                                        {{ 'status.cancelled'|t('slots') }}
+                                    {% else %}
+                                        {{ 'status.completed'|t('slots') }}
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</main>
+{% endblock %}

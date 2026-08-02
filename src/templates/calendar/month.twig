@@ -1,0 +1,135 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsCpAsset") %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsCalendarViewAsset") %}
+
+{% set selectedSubnavItem = 'calendar' %}
+{% set title = 'calendar.monthDate'|t('slots', { date: startDate|date('F Y') }) %}
+{% set currentView = 'month' %}
+
+{% set prevMonth = startDate.format('Y-m-d')|date_modify('-1 month') %}
+{% set nextMonth = startDate.format('Y-m-d')|date_modify('+1 month') %}
+
+{% block content %}
+    <div class="slots-calendar-layout">
+        <div>
+            {% include 'slots/calendar/_mini-calendar' with {
+                selectedDate: selectedDate,
+                view: currentView,
+                bookingCounts: bookingCounts
+            } %}
+        </div>
+
+        <div>
+            <div class="slots-calendar-header">
+                <div class="slots-calendar-nav">
+                    <div>
+                        <a href="{{ url('slots/calendar-view/month', {
+                            year: prevMonth|date('Y'),
+                            month: prevMonth|date('m')
+                        }) }}" class="btn">{{ 'calendar.previous'|t('slots') }}</a>
+
+                        <a href="{{ url('slots/calendar-view/month') }}" class="btn">{{ 'calendar.today'|t('slots') }}</a>
+
+                        <a href="{{ url('slots/calendar-view/month', {
+                            year: nextMonth|date('Y'),
+                            month: nextMonth|date('m')
+                        }) }}" class="btn">{{ 'calendar.next'|t('slots') }}</a>
+                    </div>
+
+                    <div class="slots-view-switcher">
+                        <a href="{{ url('slots/calendar-view/month', { year: startDate|date('Y'), month: startDate|date('m') }) }}"
+                           class="btn{% if currentView == 'month' %} active{% endif %}">
+                            {{ 'calendar.month'|t('slots') }}
+                        </a>
+                        <a href="{{ url('slots/calendar-view/week', { date: startDate|date('Y-m-d') }) }}"
+                           class="btn{% if currentView == 'week' %} active{% endif %}">
+                            {{ 'calendar.week'|t('slots') }}
+                        </a>
+                        <a href="{{ url('slots/calendar-view/day', { date: startDate|date('Y-m-d') }) }}"
+                           class="btn{% if currentView == 'day' %} active{% endif %}">
+                            {{ 'calendar.day'|t('slots') }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slots-month-grid">
+                {% set weekdays = [
+                    'Monday'|t('app'),
+                    'Tuesday'|t('app'),
+                    'Wednesday'|t('app'),
+                    'Thursday'|t('app'),
+                    'Friday'|t('app'),
+                    'Saturday'|t('app'),
+                    'Sunday'|t('app'),
+                ] %}
+
+                {% for day in weekdays %}
+                    <div class="slots-month-header-cell">{{ day }}</div>
+                {% endfor %}
+
+                {% set firstDayOfWeek = startDate.format('N') %}{# PHP DateTime::format('N'): 1=Mon, 7=Sun. Craft's |date('N') uses ICU numbering which is off by 1. #}
+                {% set daysInMonth = startDate.format('t') %}
+
+                {% for i in 1..(firstDayOfWeek - 1) %}
+                    <div class="slots-month-day-cell is-empty"></div>
+                {% endfor %}
+
+                {% for day in 1..daysInMonth %}
+                    {% set currentDate = startDate|date_modify('+' ~ (day - 1) ~ ' days')|date('Y-m-d') %}
+                    {% set dayReservations = reservations[currentDate] ?? [] %}
+                    {% set dayDateObj = startDate|date_modify('+' ~ (day - 1) ~ ' days') %}
+
+                    <div class="slots-month-day-cell">
+                        <a href="{{ url('slots/calendar-view/day', { date: currentDate }) }}" 
+                           class="slots-month-day-number"
+                           title="{{ 'calendar.clickToViewDay'|t('slots') }}">
+                            {{ day }}
+                        </a>
+
+                        {% if dayReservations|length > 0 %}
+                            <div>
+                                {% for reservation in dayReservations|slice(0, 5) %}
+                                    {% set service = reservation.getService() %}
+                                    {% set employee = reservation.getEmployee() %}
+                                    <a href="{{ url('slots/bookings/' ~ reservation.id) }}" 
+                                       class="calendar-booking status-{{ reservation.status }}"
+                                       data-booking-status="{{ reservation.status }}">
+                                        <div class="calendar-booking-time">{{ reservation.startTime }}</div>
+                                        {% if reservation.userName %}
+                                            <div class="calendar-booking-name">{{ reservation.userName }}</div>
+                                        {% endif %}
+                                        {% if service %}
+                                            <div class="calendar-booking-service">{{ service.title }}</div>
+                                        {% endif %}
+                                    </a>
+                                {% endfor %}
+
+                                {% if dayReservations|length > 5 %}
+                                    <div class="slots-month-more">
+                                        {{ 'calendar.moreBookings'|t('slots', { count: dayReservations|length - 5 }) }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="calendar-legend">
+                <h3>{{ 'calendar.filterByStatus'|t('slots') }}</h3>
+                <div class="calendar-legend-items">
+                    <div class="calendar-legend-item calendar-legend-active" data-legend-status="confirmed" title="{{ 'calendar.clickToToggleConfirmed'|t('slots') }}">
+                        <span class="calendar-legend-color status-confirmed"></span>
+                        <span class="calendar-legend-label">{{ 'status.confirmed'|t('slots') }}</span>
+                    </div>
+                    <div class="calendar-legend-item calendar-legend-active" data-legend-status="cancelled" title="{{ 'calendar.clickToToggleCancelled'|t('slots') }}">
+                        <span class="calendar-legend-color status-cancelled"></span>
+                        <span class="calendar-legend-label">{{ 'status.cancelled'|t('slots') }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

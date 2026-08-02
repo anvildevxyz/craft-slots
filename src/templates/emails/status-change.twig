@@ -1,0 +1,88 @@
+{% extends 'slots/emails/_base' %}
+
+{% set title = 'emails.statusChange.title'|t('slots') %}
+{% set headerIcon = '📋' %}
+{% set headerColor = '#000000' %}
+{% set preheader = 'emails.statusChange.preheader'|t('slots', { status: newStatus }) %}
+
+{% block header %}
+<div class="email-header">
+    <div style="
+        display: inline-block;
+        background-color: #000000;
+        color: white;
+        padding: 12px 24px;
+        font-weight: 900;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 16px;
+    ">
+        📋 {{ 'emails.statusChange.heading'|t('slots') }}
+    </div>
+    <h1 class="header-title">{{ title }}</h1>
+    <p class="header-subtitle">{{ siteName }}</p>
+</div>
+{% endblock %}
+
+{% block content %}
+    <p style="font-size: 18px; font-weight: 800; margin-bottom: 12px;">
+        {{ 'emails.hello'|t('slots', { name: userName }) }}
+    </p>
+    <p>
+        {{ 'emails.statusChange.message'|t('slots') }}
+    </p>
+
+    <div style="display: flex; align-items: center; justify-content: center; gap: 16px; margin: 32px 0; flex-wrap: wrap;">
+        <div style="padding: 16px 24px; border: 2px solid #000000; background-color: #ffffff; color: #000000; font-weight: 800; text-decoration: line-through;">
+            {{ oldStatus }}
+        </div>
+        <span style="font-size: 32px; color: #000000; font-weight: 900;">→</span>
+        <div style="padding: 16px 24px; border: 2px solid #000000; background: #000000; color: #ffffff; font-weight: 900; text-transform: uppercase;">
+            {{ newStatus }}
+        </div>
+    </div>
+
+    <div class="highlight-box">
+        <div class="highlight-primary">{{ formattedDateTime }}</div>
+        {% if serviceName is defined and serviceName %}
+        <div class="highlight-secondary">{{ serviceName }}</div>
+        {% endif %}
+        <div style="margin-top: 16px;">
+            <span class="badge badge-primary">{{ 'element.booking'|t('slots') }} #{{ bookingId }}</span>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">{{ 'labels.bookingDetails'|t('slots') }}</div>
+        <div class="info-grid">
+            <div class="info-row">
+                <span class="info-label">{{ 'labels.date'|t('slots') }}</span>
+                <span class="info-value">{{ formattedBookingDate }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">{{ 'labels.time'|t('slots') }}</span>
+                <span class="info-value">{{ formattedStartTime }} – {{ formattedEndTime }}</span>
+            </div>
+            {% if employeeName is defined and employeeName %}
+            <div class="info-row">
+                <span class="info-label">{{ 'labels.staff'|t('slots') }}</span>
+                <span class="info-value">{{ employeeName }}</span>
+            </div>
+            {% endif %}
+            {% if locationName is defined and locationName %}
+            <div class="info-row">
+                <span class="info-label">{{ 'labels.location'|t('slots') }}</span>
+                <span class="info-value">{{ locationName }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if reservation is defined %}
+    {% endif %}
+
+    <div class="btn-container">
+        <a href="{{ managementUrl }}" class="btn btn-primary">{{ 'emails.common.viewBooking'|t('slots') }}</a>
+    </div>
+{% endblock %}

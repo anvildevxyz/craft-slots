@@ -1,0 +1,149 @@
+{% extends 'slots/emails/_base' %}
+
+{% set title = 'emails.owner.title'|t('slots') %}
+{% set headerIcon = '📅' %}
+{% set headerColor = '#000000' %}
+{% set preheader = 'emails.owner.preheader'|t('slots', { name: userName, date: formattedDateTime }) %}
+
+{% block header %}
+	<div class="email-header">
+		<div style="
+				        display: inline-block;
+				        background-color: #000000;
+				        color: white;
+				        padding: 12px 24px;
+				        font-weight: 900;
+				        font-size: 12px;
+				        text-transform: uppercase;
+				        letter-spacing: 0.1em;
+				        margin-bottom: 16px;
+				    ">
+			📅
+			{{ 'labels.newBooking'|t('slots') }}
+		</div>
+		<h1 class="header-title">{{ title }}</h1>
+		<p class="header-subtitle">{{ siteName }}</p>
+	</div>
+{% endblock %}
+
+{% block content %}
+	<p style="font-size: 18px; font-weight: 800;">
+		{{ 'emails.owner.message'|t('slots') }}
+	</p>
+
+	<div class="highlight-box">
+		<div class="highlight-primary">{{ formattedDateTime }}</div>
+		{% if serviceName is defined and serviceName %}
+			<div class="highlight-secondary">{{ serviceName }}</div>
+		{% endif %}
+		{% if variationName is defined and variationName %}
+			<div class="highlight-tertiary">{{ variationName }}</div>
+		{% endif %}
+	</div>
+
+	<div class="customer-box">
+		<div class="customer-box-title">👤
+			{{ 'emails.owner.customerInfo'|t('slots') }}</div>
+		<div class="info-row" style="border: none; padding: 8px 0;">
+			<span class="info-label">{{ 'labels.name'|t('slots') }}:</span>
+			<span class="info-value">{{ userName }}</span>
+		</div>
+		<div class="info-row" style="border: none; padding: 8px 0;">
+			<span class="info-label">{{ 'labels.email'|t('slots') }}:</span>
+			<span class="info-value">
+				<a href="mailto:{{ userEmail }}">{{ userEmail }}</a>
+			</span>
+		</div>
+		{% if userPhone %}
+			<div class="info-row" style="border: none; padding: 8px 0;">
+				<span class="info-label">{{ 'labels.phone'|t('slots') }}:</span>
+				<span class="info-value">
+					<a href="tel:{{ userPhone }}">{{ userPhone }}</a>
+				</span>
+			</div>
+		{% endif %}
+	</div>
+
+	<div class="section">
+		<div class="section-title">{{ 'labels.bookingDetails'|t('slots') }}</div>
+		<div class="info-grid">
+			<div class="info-row">
+				<span class="info-label">{{ 'emails.confirmation.bookingNumber'|t('slots') }}</span>
+				<span class="info-value">
+					<span class="badge badge-primary">#{{ bookingId }}</span>
+				</span>
+			</div>
+			<div class="info-row">
+				<span class="info-label">{{ 'labels.date'|t('slots') }}</span>
+				<span class="info-value">{{ formattedBookingDate }}</span>
+			</div>
+			<div class="info-row">
+				<span class="info-label">{{ 'labels.time'|t('slots') }}</span>
+				<span class="info-value">{{ formattedStartTime }}
+					–
+					{{ formattedEndTime }}
+					({{ duration }}
+					{{ 'labels.min'|t('slots') }})</span>
+			</div>
+			{% if serviceName is defined and serviceName %}
+				<div class="info-row">
+					<span class="info-label">{{ 'labels.service'|t('slots') }}</span>
+					<span class="info-value">{{ serviceName }}</span>
+				</div>
+			{% endif %}
+			{% if employeeName is defined and employeeName %}
+				<div class="info-row">
+					<span class="info-label">{{ 'labels.employee'|t('slots') }}</span>
+					<span class="info-value">{{ employeeName }}</span>
+				</div>
+			{% endif %}
+			{% if locationName is defined and locationName %}
+				<div class="info-row">
+					<span class="info-label">{{ 'labels.location'|t('slots') }}</span>
+					<span class="info-value">{{ locationName }}</span>
+				</div>
+			{% endif %}
+			{% if variationName is defined and variationName %}
+				<div class="info-row">
+					<span class="info-label">{{ 'emails.owner.variant'|t('slots') }}</span>
+					<span class="info-value">{{ variationName }}</span>
+				</div>
+			{% endif %}
+			<div class="info-row">
+				<span class="info-label">{{ 'emails.confirmation.numberOfPeople'|t('slots') }}</span>
+				<span class="info-value">
+					<strong>{{ quantity }}</strong>
+				</span>
+			</div>
+			<div class="info-row">
+				<span class="info-label">{{ 'labels.status'|t('slots') }}</span>
+				<span class="info-value">
+					<span class="badge badge-success">{{ status }}</span>
+				</span>
+			</div>
+		</div>
+	</div>
+
+	{% if notes is defined and notes %}
+		<div class="section">
+			<div class="section-title">{{ 'emails.owner.customerNotes'|t('slots') }}</div>
+			<div style="background-color: #ffffff; border: 2px solid #000000; padding: 20px; color: #000000; font-size: 14px; font-weight: 600;">
+				{{ notes }}
+			</div>
+		</div>
+	{% endif %}
+
+
+	<div class="btn-container">
+		<a href="{{ cpEditUrl }}" class="btn btn-primary">{{ 'emails.owner.viewInCp'|t('slots') }}</a>
+	</div>
+{% endblock %}
+
+{% block footerMeta %}
+	<div class="footer-meta">
+		{{ 'emails.confirmation.createdOn'|t('slots') }}
+		{{ dateCreated }}<br>
+		{{ 'element.booking'|t('slots') }}
+		#{{ bookingId }}
+	</div>
+{% endblock %}
