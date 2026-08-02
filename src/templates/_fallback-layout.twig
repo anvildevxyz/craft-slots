@@ -1,0 +1,35 @@
+{#
+/**
+ * Slots — fallback page layout.
+ *
+ * The plugin's customer-facing pages (manage booking, cancel confirmation,
+ * cancelled, my bookings) extend the host project's `_layout`. Not every Craft
+ * site has one, and without this the booking-management URL that every
+ * confirmation email links to would render a 500 rather than a page.
+ *
+ * So those templates extend `_layout` when the project provides one and fall
+ * back to this otherwise. It is deliberately unstyled beyond the plugin's own
+ * stylesheet: a host layout should always win, and a fallback that imposed
+ * typography or colour would look broken inside someone else's design.
+ *
+ * Blocks mirror the ones the plugin's pages use, so a project layout and this
+ * one are interchangeable from the child template's point of view.
+ */
+#}
+<!DOCTYPE html>
+<html lang="{{ craft.app.language|split('-')|first }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <title>{% block title %}{{ craft.app.sites.currentSite.name }}{% endblock %}</title>
+    {% block criticalCss %}{% endblock %}
+    {% block pageCss %}{% endblock %}
+</head>
+<body class="{{ bodyClass ?? '' }}">
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    {% block pageJs %}{% endblock %}
+</body>
+</html>
