@@ -114,11 +114,24 @@ class TranslationCatalogTest extends TestCase
             $source .= file_get_contents($path) . "\n";
         }
 
+        // Some keys are composed at runtime — `('payment.status.' ~ status)|t`
+        // never appears in source as a whole key. Collect those prefixes from
+        // the source itself so the check covers them instead of tripping over
+        // them; a literal allowlist would rot the moment a prefix is renamed.
+        preg_match_all("/'([a-zA-Z][a-zA-Z0-9_.]*\\.)'\\s*~/", $source, $m);
+        $dynamicPrefixes = array_unique($m[1] ?? []);
+
         $unreferenced = [];
         foreach (array_keys(self::catalog('en')) as $key) {
-            if (!str_contains($source, $key)) {
-                $unreferenced[] = $key;
+            if (str_contains($source, $key)) {
+                continue;
             }
+            foreach ($dynamicPrefixes as $prefix) {
+                if (str_starts_with($key, $prefix)) {
+                    continue 2;
+                }
+            }
+            $unreferenced[] = $key;
         }
 
         $this->assertSame(

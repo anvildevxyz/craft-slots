@@ -49,7 +49,7 @@ class ReservationCsvExporter extends ElementExporter
                 (string) $r->getDurationMinutes(),
                 (string) $r->getStatusLabel(),
                 (string) $r->quantity,
-                number_format($r->totalPrice, 2, '.', ''),
+                number_format($r->getTotalPrice(), 2, '.', ''),
                 CsvHelper::sanitizeValue($r->notes ?? ''),
                 $r->dateCreated ? $r->dateCreated->format('Y-m-d H:i:s') : '',
             ]);

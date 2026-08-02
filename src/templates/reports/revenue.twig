@@ -83,7 +83,7 @@
                                 {% endif %}
                             </td>
                             <td>{{ reservation.startTime }} - {{ reservation.endTime }}</td>
-                            <td class="slots-font-semibold">{{ reservation.totalPrice|number_format(2) }} {{ currency }}</td>
+                            <td class="slots-font-semibold">{{ reservation.getTotalPrice()|number_format(2) }} {{ currency }}</td>
                             <td>
                                 <span class="slots-status-badge status-{{ reservation.status }}">
                                     {{ reservation.status|upper }}
