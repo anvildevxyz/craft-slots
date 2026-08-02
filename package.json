@@ -1,0 +1,32 @@
+{
+  "name": "@anvildev/slots-wizard",
+  "version": "0.1.0",
+  "description": "Headless booking wizard core + zero-dependency vanilla renderer for the Slots Craft CMS plugin.",
+  "license": "proprietary",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./core": {
+      "import": "./dist/slots-wizard-core.esm.js",
+      "require": "./dist/slots-wizard-core.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "src/web/js/core"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:watch": "node scripts/build.mjs --watch",
+    "size": "node scripts/build.mjs --size",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "esbuild": "^0.24.0",
+    "jsdom": "^29.1.1",
+    "vitest": "^2.1.0"
+  }
+}

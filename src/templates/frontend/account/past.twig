@@ -1,0 +1,25 @@
+{#
+/**
+ * Past Bookings
+ * 
+ * Shows all past bookings for the user.
+ */
+#}
+
+{% extends "slots/frontend/account/_layout" %}
+
+{% set currentPage = 'past' %}
+
+{% block pageTitle %}{{ 'account.pastBookings'|t('slots') }}{% endblock %}
+
+{% block accountContent %}
+    <div class="slots-section section-plain">
+        {% if bookings|length %}
+            {% for booking in bookings %}
+                {% include 'slots/frontend/account/_booking-card' with { booking: booking, compact: true } %}
+            {% endfor %}
+        {% else %}
+            {% include 'slots/frontend/account/_empty-state' with { message: 'account.noPastBookings'|t('slots'), showBookButton: false } %}
+        {% endif %}
+    </div>
+{% endblock %}

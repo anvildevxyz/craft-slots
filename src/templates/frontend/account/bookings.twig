@@ -1,0 +1,29 @@
+{#
+/**
+ * All Bookings
+ * 
+ * Shows all bookings for the user.
+ */
+#}
+
+{% extends "slots/frontend/account/_layout" %}
+
+{% set currentPage = 'all' %}
+
+{% block pageTitle %}{{ 'account.allBookings'|t('slots') }}{% endblock %}
+
+{% block accountContent %}
+    <div class="slots-section section-plain">
+        {% if bookings|length %}
+            <p class="slots-booking-meta slots-booking-count">
+                {{ 'account.showingBookings'|t('slots', { count: bookings|length }) }}
+            </p>
+            {% for booking in bookings %}
+                {% set isPast = booking.bookingDate < date()|date('Y-m-d') %}
+                {% include 'slots/frontend/account/_booking-card' with { booking: booking, compact: isPast } %}
+            {% endfor %}
+        {% else %}
+            {% include 'slots/frontend/account/_empty-state' with { message: 'account.noBookingsFound'|t('slots') } %}
+        {% endif %}
+    </div>
+{% endblock %}

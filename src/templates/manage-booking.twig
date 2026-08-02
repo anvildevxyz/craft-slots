@@ -1,0 +1,431 @@
+{#
+/**
+ * Booking Management Template
+ *
+ * Displays booking details and allows user to cancel or reschedule
+ * Accessed via: /booking/manage/{token}
+ *
+ * Variables:
+ * - reservation: ReservationInterface
+ * - canCancel: bool
+ * - isPast: bool
+ */
+#}
+
+{% extends "_layout" %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsAsset") %}
+
+{% set bodyClass = 'page-booking-management' %}
+
+{% set service = reservation.getService() %}
+{% set employee = reservation.getEmployee() %}
+{% set location = reservation.getLocation() %}
+{% set isCancelled = reservation.status == 'cancelled' %}
+{% set canEditQuantity = reservation.getQuantity() > 1 %}
+{% set bookingPageUrl = craft.slots.getSettings().bookingPageUrl ?? '/' %}
+
+{% block content %}
+<div class="slots-wizard">
+
+    {% if craft.app.session.hasFlash('notice') %}
+        <div class="slots-flash">
+            <p>{{ craft.app.session.getFlash('notice') }}</p>
+        </div>
+    {% endif %}
+
+    {% if craft.app.session.hasFlash('error') %}
+        <div class="slots-flash flash-error">
+            <p>{{ craft.app.session.getFlash('error') }}</p>
+        </div>
+    {% endif %}
+
+    {# Black header band — mirrors the wizard step indicator #}
+    <div class="slots-manage-bar">
+        <span class="slots-manage-bar-label">
+            {% if isCancelled %}
+                {{ 'templates.bookingAlreadyCancelled'|t('slots') }}
+            {% elseif isPast %}
+                {{ 'templates.bookingCompleted'|t('slots') }}
+            {% else %}
+                {{ 'templates.yourBooking'|t('slots') }}
+            {% endif %}
+        </span>
+        <span class="slots-manage-bar-id">#{{ reservation.getId() }}</span>
+    </div>
+
+    {# Hero — date/time as the focal point #}
+    <div class="slots-manage-hero">
+        <div class="slots-manage-datetime{% if isCancelled %} slots-struck{% endif %}">
+            {{ reservation.getFormattedDateTime() }}
+        </div>
+        {% if service %}
+            <div class="slots-manage-service">{{ service.title }}</div>
+        {% endif %}
+        {% if isCancelled %}
+            <span class="slots-status-badge slots-status-badge--cancelled">
+                {{ 'status.cancelled'|t('slots') }}
+            </span>
+        {% elseif isPast %}
+            <span class="slots-status-badge slots-status-badge--past">
+                {{ 'status.completed'|t('slots') }}
+            </span>
+        {% endif %}
+    </div>
+
+    {# Content sections #}
+    <div class="slots-manage-body">
+
+        {# Booking details #}
+        <div class="slots-manage-section slots-manage-reveal" style="animation-delay: 0.05s">
+            <div class="slots-manage-section-title">{{ 'templates.bookingDetails'|t('slots') }}</div>
+            <div class="slots-manage-grid">
+                <div class="slots-manage-row">
+                    <span class="slots-manage-label">{{ 'templates.dateTime'|t('slots') }}</span>
+                    <span class="slots-manage-value{% if isCancelled %} slots-struck{% endif %}">{{ reservation.getFormattedDateTime() }}</span>
+                </div>
+                <div class="slots-manage-row">
+                    <span class="slots-manage-label">{{ 'templates.duration'|t('slots') }}</span>
+                    <span class="slots-manage-value">{{ reservation.getDurationMinutes() }} {{ 'templates.minutes'|t('slots') }}</span>
+                </div>
+                {% if employee %}
+                    <div class="slots-manage-row">
+                        <span class="slots-manage-label">{{ 'labels.employee'|t('slots') }}</span>
+                        <span class="slots-manage-value">{{ employee.title }}</span>
+                    </div>
+                {% endif %}
+                {% if location %}
+                    <div class="slots-manage-row">
+                        <span class="slots-manage-label">{{ 'labels.location'|t('slots') }}</span>
+                        <span class="slots-manage-value">{{ location.title }}</span>
+                    </div>
+                {% endif %}
+                {% if canEditQuantity or reservation.getQuantity() > 1 %}
+                    <div class="slots-manage-row">
+                        <span class="slots-manage-label">{{ 'wizard.manageQuantity'|t('slots') }}</span>
+                        <span class="slots-manage-value">{{ reservation.getQuantity() }}</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {# Customer info #}
+        <div class="slots-manage-section slots-manage-reveal" style="animation-delay: 0.1s">
+            <div class="slots-manage-section-title">{{ 'templates.customerInfo'|t('slots') }}</div>
+            <div class="slots-manage-grid">
+                <div class="slots-manage-row">
+                    <span class="slots-manage-label">{{ 'templates.name'|t('slots') }}</span>
+                    <span class="slots-manage-value">{{ reservation.userName }}</span>
+                </div>
+                <div class="slots-manage-row">
+                    <span class="slots-manage-label">{{ 'templates.email'|t('slots') }}</span>
+                    <span class="slots-manage-value">{{ reservation.userEmail }}</span>
+                </div>
+                {% if reservation.userPhone %}
+                    <div class="slots-manage-row">
+                        <span class="slots-manage-label">{{ 'templates.phone'|t('slots') }}</span>
+                        <span class="slots-manage-value">{{ reservation.userPhone }}</span>
+                    </div>
+                {% endif %}
+                {% if reservation.notes %}
+                    <div class="slots-manage-row">
+                        <span class="slots-manage-label">{{ 'templates.notes'|t('slots') }}</span>
+                        <span class="slots-manage-value">{{ reservation.notes }}</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {# Quantity adjustment #}
+        {% if not isPast and not isCancelled and canEditQuantity %}
+            <div class="slots-manage-section slots-manage-reveal" style="animation-delay: 0.15s">
+                <div class="slots-manage-section-title">{{ 'wizard.manageChangeAmount'|t('slots') }}</div>
+                <div class="slots-quantity-row">
+                    <input
+                        type="number"
+                        id="slots-new-quantity"
+                        value="{{ reservation.getQuantity() }}"
+                        min="1"
+                        class="slots-quantity-input"
+                    >
+                    <button type="button" class="btn" id="slots-quantity-submit" disabled>
+                        {{ 'templates.updateQuantity'|t('slots') }}
+                    </button>
+                </div>
+                <p class="slots-quantity-error" id="slots-quantity-error"></p>
+                <script>
+                (function() {
+                    var currentQty = {{ reservation.getQuantity() }};
+                    var reservationId = {{ reservation.getId() }};
+                    var token = '{{ reservation.getConfirmationToken()|e('js') }}';
+                    var csrfName = '{{ craft.app.config.general.csrfTokenName }}';
+                    var csrfToken = '{{ craft.app.request.csrfToken }}';
+                    var redirectUrl = '{{ reservation.getManagementUrl()|e('js') }}';
+
+                    var input = document.getElementById('slots-new-quantity');
+                    var submitBtn = document.getElementById('slots-quantity-submit');
+                    var errorEl = document.getElementById('slots-quantity-error');
+
+                    function showError(msg) {
+                        errorEl.textContent = msg;
+                        errorEl.style.display = msg ? 'block' : 'none';
+                    }
+
+                    input.addEventListener('input', function() {
+                        showError('');
+                        var newQty = parseInt(input.value, 10);
+                        submitBtn.disabled = isNaN(newQty) || newQty < 1 || newQty === currentQty;
+                    });
+
+                    submitBtn.addEventListener('click', function() {
+                        var newQty = parseInt(input.value, 10);
+                        if (isNaN(newQty) || newQty < 1 || newQty === currentQty) return;
+
+                        showError('');
+                        submitBtn.disabled = true;
+
+                        var isReduce = newQty < currentQty;
+                        var action = isReduce
+                            ? '/actions/slots/booking-management/reduce-quantity'
+                            : '/actions/slots/booking-management/increase-quantity';
+
+                        var params = new URLSearchParams();
+                        params.append(csrfName, csrfToken);
+                        params.append('id', reservationId);
+                        params.append('token', token);
+                        params.append(isReduce ? 'reduceBy' : 'increaseBy', Math.abs(newQty - currentQty));
+
+                        fetch(action, {
+                            method: 'POST',
+                            headers: { 'Accept': 'application/json' },
+                            body: params,
+                        })
+                        .then(function(r) { return r.json(); })
+                        .then(function(data) {
+                            if (data.success) {
+                                window.location.href = redirectUrl;
+                            } else {
+                                showError(data.message || data.error || '{{ 'templates.quantityUpdateFailed'|t('slots')|e('js') }}');
+                                submitBtn.disabled = false;
+                            }
+                        })
+                        .catch(function() {
+                            showError('{{ 'templates.quantityUpdateFailed'|t('slots')|e('js') }}');
+                            submitBtn.disabled = false;
+                        });
+                    });
+                })();
+                </script>
+            </div>
+        {% endif %}
+
+        {# Reschedule #}
+        {% if not isPast and not isCancelled and canReschedule %}
+            <div class="slots-manage-section slots-manage-reveal" style="animation-delay: 0.18s">
+                <div class="slots-manage-section-title">{{ 'templates.rescheduleBooking'|t('slots') }}</div>
+
+                <input
+                    type="date"
+                    id="slots-reschedule-date"
+                    class="slots-quantity-input slots-reschedule-date"
+                    min="{{ now|date('Y-m-d') }}"
+                    value="{{ reservation.getBookingDate() }}"
+                    aria-label="{{ 'templates.rescheduleChooseDate'|t('slots') }}"
+                >
+
+                <div class="slots-reschedule-slots" id="slots-reschedule-slots" role="group"
+                     aria-label="{{ 'templates.rescheduleChooseTime'|t('slots') }}"></div>
+
+                <button type="button" class="btn btn-primary slots-reschedule-submit" id="slots-reschedule-submit" disabled>
+                    {{ 'templates.rescheduleConfirm'|t('slots') }}
+                </button>
+
+                <p class="slots-quantity-error" id="slots-reschedule-error"></p>
+
+                <script>
+                (function() {
+                    var manageToken = '{{ reservation.getConfirmationToken()|e('js') }}';
+                    var csrfName = '{{ craft.app.config.general.csrfTokenName }}';
+                    var csrfToken = '{{ craft.app.request.csrfToken }}';
+                    var redirectUrl = '{{ reservation.getManagementUrl()|e('js') }}';
+                    var quantity = {{ reservation.getQuantity() }};
+                    var employeeId = {{ reservation.getEmployeeId() ?? 'null' }};
+                    var locationId = {{ reservation.getLocationId() ?? 'null' }};
+                    var serviceId = {{ reservation.getServiceId() ?? 'null' }};
+                    var currentDate = '{{ reservation.getBookingDate()|e('js') }}';
+                    var currentStart = '{{ reservation.getStartTime()|e('js') }}';
+
+                    var labels = {
+                        loading: {{ 'templates.rescheduleLoading'|t('slots')|json_encode|raw }},
+                        none: {{ 'templates.rescheduleNoSlots'|t('slots')|json_encode|raw }},
+                        failed: {{ 'templates.rescheduleFailed'|t('slots')|json_encode|raw }},
+                        current: {{ 'templates.rescheduleCurrentSlot'|t('slots')|json_encode|raw }}
+                    };
+
+                    var dateInput = document.getElementById('slots-reschedule-date');
+                    var slotsEl = document.getElementById('slots-reschedule-slots');
+                    var submitBtn = document.getElementById('slots-reschedule-submit');
+                    var errorEl = document.getElementById('slots-reschedule-error');
+                    var selected = null;
+
+                    function showError(msg) {
+                        errorEl.textContent = msg || '';
+                        errorEl.style.display = msg ? 'block' : 'none';
+                    }
+
+                    function setSelected(slot, button) {
+                        selected = slot;
+                        Array.prototype.forEach.call(
+                            slotsEl.querySelectorAll('.slots-reschedule-slot'),
+                            function(el) {
+                                el.classList.remove('is-selected');
+                                el.setAttribute('aria-pressed', 'false');
+                            }
+                        );
+                        if (button) {
+                            button.classList.add('is-selected');
+                            button.setAttribute('aria-pressed', 'true');
+                        }
+                        submitBtn.disabled = !slot;
+                    }
+
+                    function renderSlots(slots) {
+                        slotsEl.textContent = '';
+                        setSelected(null, null);
+
+                        if (!slots || !slots.length) {
+                            var empty = document.createElement('p');
+                            empty.className = 'slots-manage-notice';
+                            empty.textContent = labels.none;
+                            slotsEl.appendChild(empty);
+                            return;
+                        }
+
+                        slots.forEach(function(slot) {
+                            // The slot the booking already occupies is not a move.
+                            var isCurrent = dateInput.value === currentDate
+                                && slot.time.substring(0, 5) === currentStart.substring(0, 5);
+
+                            var btn = document.createElement('button');
+                            btn.type = 'button';
+                            btn.className = 'slots-reschedule-slot';
+                            btn.setAttribute('aria-pressed', 'false');
+                            btn.textContent = slot.time.substring(0, 5);
+
+                            if (isCurrent) {
+                                btn.disabled = true;
+                                btn.classList.add('is-current');
+                                btn.title = labels.current;
+                            } else {
+                                btn.addEventListener('click', function() {
+                                    showError('');
+                                    setSelected(slot, btn);
+                                });
+                            }
+
+                            slotsEl.appendChild(btn);
+                        });
+                    }
+
+                    function loadSlots() {
+                        showError('');
+                        setSelected(null, null);
+                        slotsEl.textContent = labels.loading;
+
+                        var params = new URLSearchParams();
+                        params.append('date', dateInput.value);
+                        params.append('quantity', quantity);
+                        if (employeeId) { params.append('employeeId', employeeId); }
+                        if (locationId) { params.append('locationId', locationId); }
+                        if (serviceId) { params.append('serviceId', serviceId); }
+                        params.append(csrfName, csrfToken);
+
+                        fetch('/actions/slots/slot/get-available-slots', {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: params.toString()
+                        })
+                            .then(function(r) { return r.json(); })
+                            .then(function(data) {
+                                if (!data || data.success === false) {
+                                    slotsEl.textContent = '';
+                                    showError((data && (data.message || data.error)) || labels.failed);
+                                    return;
+                                }
+                                renderSlots(data.slots || (data.data && data.data.slots) || []);
+                            })
+                            .catch(function() {
+                                slotsEl.textContent = '';
+                                showError(labels.failed);
+                            });
+                    }
+
+                    submitBtn.addEventListener('click', function() {
+                        if (!selected) { return; }
+                        submitBtn.disabled = true;
+                        showError('');
+
+                        var params = new URLSearchParams();
+                        params.append('action', 'reschedule');
+                        params.append('manageToken', manageToken);
+                        params.append('newDate', dateInput.value);
+                        params.append('newStartTime', selected.time);
+                        params.append('newEndTime', selected.endTime);
+                        params.append(csrfName, csrfToken);
+
+                        fetch('/actions/slots/booking-management/manage-booking', {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            body: params.toString()
+                        })
+                            .then(function(r) { return r.json(); })
+                            .then(function(data) {
+                                if (data && data.success) {
+                                    window.location.href = redirectUrl;
+                                    return;
+                                }
+                                submitBtn.disabled = false;
+                                showError((data && (data.message || data.error)) || labels.failed);
+                            })
+                            .catch(function() {
+                                submitBtn.disabled = false;
+                                showError(labels.failed);
+                            });
+                    });
+
+                    dateInput.addEventListener('change', loadSlots);
+                    loadSlots();
+                })();
+                </script>
+            </div>
+        {% endif %}
+
+        {# Actions #}
+        <div class="slots-manage-actions slots-manage-reveal" style="animation-delay: 0.2s">
+            {% if not isPast and not isCancelled %}
+                <a href="{{ reservation.getIcsUrl() }}" class="btn">
+                    {{ 'account.addToCalendar'|t('slots') }}
+                </a>
+                {% if canCancel %}
+                    <a href="{{ reservation.getCancelUrl() }}" class="slots-btn-danger-outline">
+                        {{ 'templates.cancelBooking'|t('slots') }}
+                    </a>
+                {% endif %}
+            {% elseif not isCancelled %}
+                <p class="slots-manage-notice">{{ 'templates.cannotCancelBooking'|t('slots') }}</p>
+            {% endif %}
+            <a href="{{ bookingPageUrl }}" class="btn btn-primary">
+                {{ 'templates.bookNewAppointment'|t('slots') }}
+            </a>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsCpAsset") %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsSettingsAsset") %}
+
+{% set fullPageForm = true %}
+{% set selectedSubnavItem = 'settings' %}
+{% set selectedSettingsSubnavItem = 'payments' %}
+{% set title = 'settings.payments.title'|t('slots') %}
+
+{% block sidebar %}
+    {% include 'slots/settings/_sidebar' %}
+{% endblock %}
+
+{% set mode = settings.paymentMode ?? settings.getPaymentMode() %}
+
+{% set modeOptions = [
+    { label: 'settings.payments.mode.none'|t('slots'), value: 'none' },
+    { label: 'settings.payments.mode.direct'|t('slots'), value: 'direct' },
+] %}
+
+{% block content %}
+    <form method="post" accept-charset="UTF-8" id="settings-form">
+        {{ csrfInput() }}
+        <input type="hidden" name="action" value="slots/cp/settings/save">
+        <input type="hidden" name="tab" value="payments">
+        {{ redirectInput('slots/settings/payments') }}
+
+        <h2 class="heading first">{{ 'settings.payments.title'|t('slots') }}</h2>
+        <p class="light">{{ 'settings.payments.description'|t('slots') }}</p>
+        <hr>
+
+        {{ forms.selectField({
+            label: 'settings.payments.mode.label'|t('slots'),
+            instructions: 'settings.payments.mode.instructions'|t('slots'),
+            id: 'paymentMode',
+            name: 'settings[paymentMode]',
+            options: modeOptions,
+            value: mode,
+        }) }}
+
+        {% set currencyInput %}
+            {{ forms.select({
+                id: 'defaultCurrency',
+                name: 'settings[defaultCurrency]',
+                options: currencyOptions,
+                value: settings.defaultCurrency ?? 'auto',
+                class: 'selectize fullwidth',
+            }) }}
+        {% endset %}
+        {{ forms.field({
+            label: 'settings.booking.defaultCurrency'|t('slots'),
+            instructions: 'settings.payments.currencyInstructions'|t('slots'),
+            id: 'defaultCurrency',
+        }, currencyInput) }}
+
+        <hr>
+        <h2>{{ 'settings.payments.stripe.title'|t('slots') }}</h2>
+        <p class="light">{{ 'settings.payments.stripe.description'|t('slots') }}</p>
+
+        {{ forms.autosuggestField({
+            label: 'settings.payments.stripe.publishableKey'|t('slots'),
+            instructions: 'settings.payments.stripe.publishableKeyInstructions'|t('slots'),
+            id: 'stripePublishableKey',
+            name: 'settings[stripePublishableKey]',
+            suggestEnvVars: true,
+            value: settings.stripePublishableKey,
+            placeholder: '$STRIPE_PUBLISHABLE_KEY',
+        }) }}
+
+        {{ forms.autosuggestField({
+            label: 'settings.payments.stripe.secretKey'|t('slots'),
+            instructions: 'settings.payments.stripe.secretKeyInstructions'|t('slots'),
+            id: 'stripeSecretKey',
+            name: 'settings[stripeSecretKey]',
+            suggestEnvVars: true,
+            value: settings.stripeSecretKey,
+            placeholder: '$STRIPE_SECRET_KEY',
+        }) }}
+
+        {{ forms.autosuggestField({
+            label: 'settings.payments.stripe.webhookSecret'|t('slots'),
+            instructions: 'settings.payments.stripe.webhookSecretInstructions'|t('slots'),
+            id: 'stripeWebhookSecret',
+            name: 'settings[stripeWebhookSecret]',
+            suggestEnvVars: true,
+            value: settings.stripeWebhookSecret,
+            placeholder: '$STRIPE_WEBHOOK_SECRET',
+        }) }}
+
+        {{ forms.field({
+            label: 'settings.payments.stripe.webhookUrl'|t('slots'),
+            instructions: 'settings.payments.stripe.webhookUrlInstructions'|t('slots'),
+        }, '<code class="fullwidth">' ~ webhookUrl ~ '</code>') }}
+
+        {{ forms.textField({
+            label: 'settings.payments.pendingTtl'|t('slots'),
+            instructions: 'settings.payments.pendingTtlInstructions'|t('slots'),
+            id: 'pendingPaymentTtlMinutes',
+            name: 'settings[pendingPaymentTtlMinutes]',
+            value: settings.pendingPaymentTtlMinutes,
+            type: 'number',
+            min: 5,
+            max: 1440,
+            size: 5,
+        }) }}
+    </form>
+{% endblock %}

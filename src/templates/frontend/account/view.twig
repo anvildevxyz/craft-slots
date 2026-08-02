@@ -1,0 +1,101 @@
+{#
+/**
+ * View Single Booking
+ *
+ * Shows detailed information about a single booking.
+ */
+#}
+
+{% extends "slots/frontend/account/_layout" %}
+
+{% set currentPage = '' %}
+
+{% block pageTitle %}{{ 'labels.bookingDetails'|t('slots') }}{% endblock %}
+
+{% block accountContent %}
+    <div class="slots-section section-plain">
+        <a href="{{ url('slots/account') }}" class="slots-back-link">
+            ← {{ 'account.backToDashboard'|t('slots') }}
+        </a>
+
+        <div class="slots-detail-card">
+            <div class="slots-detail-header">
+                <span class="slots-badge badge-{{ booking.status }}">
+                    {{ booking.getStatusLabel() }}
+                </span>
+            </div>
+
+            <h4 class="slots-detail-title">
+                {% if booking.service %}{{ booking.service.title }}{% else %}{{ 'element.booking'|t('slots') }}{% endif %}
+            </h4>
+
+            <div class="slots-detail-grid">
+                <div>
+                    <p class="slots-detail-item-label">{{ 'labels.dateTime'|t('slots') }}</p>
+                    <p class="slots-detail-item-value">{{ booking.getFormattedDateTime() }}</p>
+                </div>
+
+                {% if booking.employee %}
+                    <div>
+                        <p class="slots-detail-item-label">{{ 'labels.employee'|t('slots') }}</p>
+                        <p class="slots-detail-item-value">{{ booking.employee.title }}</p>
+                    </div>
+                {% endif %}
+
+                {% if booking.location %}
+                    <div>
+                        <p class="slots-detail-item-label">{{ 'labels.location'|t('slots') }}</p>
+                        <p class="slots-detail-item-value">{{ booking.location.title }}</p>
+                    </div>
+                {% endif %}
+
+                <div>
+                    <p class="slots-detail-item-label">{{ 'labels.duration'|t('slots') }}</p>
+                    <p class="slots-detail-item-value">{{ booking.getDurationMinutes() }} {{ 'labels.minutes'|t('slots') }}</p>
+                </div>
+
+                {% if booking.quantity > 1 %}
+                    <div>
+                        <p class="slots-detail-item-label">{{ 'labels.quantity'|t('slots') }}</p>
+                        <p class="slots-detail-item-value">{{ booking.quantity }}</p>
+                    </div>
+                {% endif %}
+
+                <div>
+                    <p class="slots-detail-item-label">{{ 'account.bookingId'|t('slots') }}</p>
+                    <p class="slots-detail-item-value">#{{ booking.id }}</p>
+                </div>
+            </div>
+
+
+            {% if booking.notes %}
+                <div class="slots-detail-section">
+                    <p class="slots-detail-item-label">{{ 'labels.notes'|t('slots') }}</p>
+                    <p class="slots-detail-item-value">{{ booking.notes }}</p>
+                </div>
+            {% endif %}
+
+
+            <div class="slots-detail-actions">
+                <a href="{{ booking.getIcsUrl() }}" class="slots-btn">
+                    {{ 'account.addToCalendar'|t('slots') }}
+                </a>
+
+                {% if booking.canBeCancelled() and booking.status != 'cancelled' %}
+                    <form method="post" action="" class="inline-block">
+                        {{ csrfInput() }}
+                        {{ actionInput('slots/account/cancel') }}
+                        {{ hiddenInput('id', booking.id) }}
+                        {{ redirectInput(url('slots/account')) }}
+                        <button
+                            type="submit"
+                            onclick="return confirm('{{ 'account.cancelConfirm'|t('slots')|e('js') }}')"
+                            class="slots-btn slots-btn-danger">
+                            {{ 'account.cancelBooking'|t('slots') }}
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

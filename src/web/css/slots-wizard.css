@@ -1,0 +1,553 @@
+/**
+ * Slots vanilla wizard styles.
+ *
+ * Matches the design language of the legacy Alpine wizard: an
+ * editorial black-and-white panel with a 2px black border, square corners,
+ * uppercase bold buttons and a black progress bar. Everything is scoped to
+ * `.slots-wizard` and driven by `--bk-*` custom properties, so a site
+ * re-themes the wizard by overriding those on the container (or :root) — no CSS
+ * framework, no build step. Targets the stable `data-slots-*` contract and the
+ * accessible calendar/listbox markup.
+ */
+
+.slots-wizard {
+  /* Theming surface — override these to restyle. Defaults mirror the legacy
+     wizard's --bk-* palette (monochrome, square, editorial). */
+  --slots-fg: #000000;
+  --slots-bg: #ffffff;
+  --slots-bg-soft: #fafafa;
+  --slots-bg-light: #f0f0f0;
+  --slots-muted: #666666;
+  --slots-border: #000000; /* strong 2px borders (panel, cards, buttons) */
+  --slots-border-light: #e0e0e0; /* subtle dividers (extras rows) */
+  --slots-primary: #000000;
+  --slots-on-primary: #ffffff;
+  --slots-accent: #000000; /* focus rings */
+  --slots-success: #16a34a;
+  --slots-error: #dc2626;
+  --slots-disabled: #cccccc;
+  --slots-radius: 0;
+  --slots-border-width: 2px;
+  --slots-space: 1rem;
+  --slots-gap: 0.75rem;
+  --slots-tracking: 0.05em;
+  --slots-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  color: var(--slots-fg);
+  background: var(--slots-bg);
+  width: 100%;
+  max-width: 720px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  border: var(--slots-border-width) solid var(--slots-border);
+  font-family: var(--slots-font);
+  line-height: 1.5;
+}
+
+.slots-wizard *,
+.slots-wizard *::before,
+.slots-wizard *::after {
+  box-sizing: border-box;
+}
+
+/* Belt-and-braces: keep [hidden] hidden even under aggressive resets. */
+.slots-wizard [hidden] {
+  display: none !important;
+}
+
+/* --- Chrome ------------------------------------------------------------- */
+
+.slots-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Full-bleed black bar at the top — echoes the legacy step indicator. */
+.slots-progress {
+  margin: -1.5rem -1.5rem 1.5rem;
+  padding: 12px 16px;
+  background: var(--slots-primary);
+  color: var(--slots-on-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--slots-tracking);
+}
+
+[data-slots-error] {
+  color: var(--slots-error);
+  border: var(--slots-border-width) solid currentColor;
+  border-radius: var(--slots-radius);
+  padding: 0.5rem 0.75rem;
+  margin-bottom: var(--slots-space);
+  font-weight: 500;
+}
+
+[data-slots-loading] {
+  color: var(--slots-muted);
+}
+
+.slots-wizard h2 {
+  font-size: 1.25rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--slots-space);
+}
+
+.slots-wizard h2:focus-visible {
+  outline: var(--slots-border-width) solid var(--slots-accent);
+  outline-offset: 4px;
+}
+
+/* --- Choose-one card lists (service / location / employee / events) ------ */
+
+.slots-cards {
+  display: grid;
+  gap: var(--slots-gap);
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  margin-bottom: var(--slots-space);
+}
+
+.slots-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-align: left;
+  padding: 20px 24px;
+  border: var(--slots-border-width) solid var(--slots-border);
+  border-radius: var(--slots-radius);
+  background: var(--slots-bg);
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.slots-card:hover {
+  background: var(--slots-bg-soft);
+}
+
+/* Selected card inverts to solid black — the legacy wizard's selection cue. */
+.slots-card[aria-pressed='true'] {
+  background: var(--slots-primary);
+  color: var(--slots-on-primary);
+}
+
+.slots-card[aria-pressed='true'] .slots-card__price,
+.slots-card[aria-pressed='true'] .slots-card__bio {
+  color: var(--slots-disabled);
+}
+
+.slots-card[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.slots-card__name {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+
+.slots-card__price,
+.slots-card__bio {
+  color: var(--slots-muted);
+  font-size: 0.875rem;
+}
+
+/* --- Extras steppers ---------------------------------------------------- */
+
+.slots-extra {
+  display: flex;
+  align-items: center;
+  gap: var(--slots-gap);
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--slots-border-light);
+}
+
+.slots-extra__name {
+  font-weight: 600;
+}
+
+.slots-extra__price {
+  color: var(--slots-muted);
+  margin-inline-start: auto;
+}
+
+.slots-extra button {
+  width: 2rem;
+  height: 2rem;
+  border: var(--slots-border-width) solid var(--slots-border);
+  border-radius: var(--slots-radius);
+  background: var(--slots-bg);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.slots-extra button:hover:not(:disabled) {
+  background: var(--slots-primary);
+  color: var(--slots-on-primary);
+}
+
+.slots-extra button:disabled {
+  color: var(--slots-disabled);
+  border-color: var(--slots-border-light);
+  cursor: default;
+}
+
+.slots-extra [data-slots-extra-qty] {
+  min-width: 1.5rem;
+  text-align: center;
+  font-weight: 700;
+}
+
+[data-slots-extras-total] {
+  font-weight: 700;
+}
+
+/* --- Calendar ----------------------------------------------------------- */
+
+.slots-calendar {
+  border: var(--slots-border-width) solid var(--slots-border);
+  border-radius: var(--slots-radius);
+  padding: var(--slots-space);
+  margin-bottom: var(--slots-space);
+}
+
+/* Header row: prev | month label | next, all on one line. */
+.slots-calendar .slots-cal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--slots-gap);
+  margin-bottom: var(--slots-space);
+}
+
+.slots-calendar [data-slots-cal='label'] {
+  flex: 1;
+  text-align: center;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--slots-tracking);
+}
+
+.slots-calendar [data-slots-cal='prev'],
+.slots-calendar [data-slots-cal='next'] {
+  border: var(--slots-border-width) solid var(--slots-border);
+  border-radius: var(--slots-radius);
+  background: var(--slots-bg);
+  width: 2rem;
+  height: 2rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.slots-calendar [data-slots-cal='prev']:hover,
+.slots-calendar [data-slots-cal='next']:hover {
+  background: var(--slots-primary);
+  color: var(--slots-on-primary);
+}
+
+.slots-calendar table[role='grid'] {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--slots-space);
+}
+
+.slots-calendar th {
+  color: var(--slots-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--slots-tracking);
+  padding: 0.25rem;
+}
+
+.slots-calendar td[data-slots-date] {
+  text-align: center;
+  padding: 0.5rem 0;
+  border-radius: var(--slots-radius);
+  cursor: pointer;
+}
+
+/* Hover only affects normal, selectable days — never the selected/range days
+   (which stay solid black with white text) or disabled days, so the date
+   number always stays legible against its background. */
+.slots-calendar
+  td[data-slots-date]:not([aria-selected='true']):not([data-in-range='true']):not([data-range-start='true']):not([data-range-end='true']):not([aria-disabled='true']):hover {
+  background: var(--slots-bg-light, #f0f0f0);
+  color: var(--slots-fg);
+  box-shadow: inset 0 0 0 1px var(--slots-border);
+}
+
+.slots-calendar td[aria-disabled='true'] {
+  color: var(--slots-disabled);
+  cursor: default;
+}
+
+.slots-calendar td[aria-selected='true'] {
+  background: var(--slots-primary);
+  color: var(--slots-on-primary);
+}
+
+/* Multi-day range highlighting. */
+.slots-calendar td[data-in-range='true'] {
+  background: var(--slots-bg-soft);
+  box-shadow: inset 0 0 0 1px var(--slots-border);
+}
+
+.slots-calendar td[data-range-start='true'],
+.slots-calendar td[data-range-end='true'] {
+  background: var(--slots-primary);
+  color: var(--slots-on-primary);
+}
+
+.slots-calendar td[data-slots-date]:focus-visible {
+  outline: var(--slots-border-width) solid var(--slots-accent);
+  outline-offset: -2px;
+}
+
+/* --- Slot listbox ------------------------------------------------------- */
+
+.slots-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: var(--slots-space);
+}
+
+.slots-slots [role='option'] {
+  padding: 0.5rem 0.75rem;
+  border: var(--slots-border-width) solid var(--slots-border);
+  border-radius: var(--slots-radius);
+  background: var(--slots-bg);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.slots-slots [role='option']:hover:not([aria-disabled='true']) {
+  background: var(--slots-primary);
+  color: var(--slots-on-primary);
+}
+
+.slots-slots [role='option'][aria-selected='true'] {
+  background: var(--slots-primary);
+  color: var(--slots-on-primary);
+  border-color: var(--slots-primary);
+}
+
+.slots-slots [role='option'][aria-disabled='true'] {
+  color: var(--slots-disabled);
+  border-color: var(--slots-border-light);
+  cursor: default;
+}
+
+/* Remaining seats on a group slot, stacked under the time it belongs to. */
+.slots-slot__seats {
+  display: block;
+  font-size: 0.75em;
+  font-weight: 400;
+  opacity: 0.75;
+}
+
+/* --- Quantity picker ---------------------------------------------------- */
+
+.slots-quantity {
+  display: flex;
+  align-items: center;
+  gap: var(--slots-gap);
+  margin-bottom: var(--slots-space);
+}
+
+.slots-quantity button {
+  width: 2rem;
+  height: 2rem;
+  border: var(--slots-border-width) solid var(--slots-border);
+  border-radius: var(--slots-radius);
+  background: var(--slots-bg);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.slots-quantity button:hover:not(:disabled) {
+  background: var(--slots-primary);
+  color: var(--slots-on-primary);
+}
+
+.slots-quantity button:disabled {
+  color: var(--slots-disabled);
+  border-color: var(--slots-border-light);
+  cursor: default;
+}
+
+.slots-quantity [data-slots-slot-qty-value],
+.slots-quantity [data-slots-event-qty-value] {
+  min-width: 1.5rem;
+  text-align: center;
+  font-weight: 700;
+}
+
+/* --- Info form ---------------------------------------------------------- */
+
+[data-slots-step='info'] label {
+  display: block;
+  margin-bottom: var(--slots-gap);
+  font-weight: 500;
+}
+
+[data-slots-step='info'] input,
+[data-slots-step='info'] textarea {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  border: var(--slots-border-width) solid var(--slots-border);
+  border-radius: var(--slots-radius);
+  font: inherit;
+}
+
+[data-slots-step='info'] input:focus,
+[data-slots-step='info'] textarea:focus {
+  outline: none;
+  box-shadow: inset 0 0 0 1px var(--slots-primary);
+}
+
+[data-slots-step='info'] input[aria-invalid='true'],
+[data-slots-step='info'] textarea[aria-invalid='true'] {
+  border-color: var(--slots-error);
+}
+
+.slots-field-error {
+  color: var(--slots-error);
+  font-size: 0.8125rem;
+  margin: 0.25rem 0 0;
+}
+
+/* --- Review & success --------------------------------------------------- */
+
+.slots-summary {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem 1rem;
+  margin-bottom: var(--slots-space);
+  border: 1px solid var(--slots-border-light);
+  padding: var(--slots-space);
+}
+
+.slots-summary dt {
+  color: var(--slots-muted);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: var(--slots-tracking);
+  align-self: center;
+}
+
+.slots-summary dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.slots-payment-notice {
+  color: var(--slots-fg);
+  font-weight: 700;
+  border: var(--slots-border-width) solid var(--slots-border);
+  padding: 0.5rem 0.75rem;
+  margin-bottom: var(--slots-space);
+}
+
+.slots-success {
+  text-align: center;
+}
+
+.slots-success .slots-summary {
+  text-align: left;
+}
+
+/* --- Navigation --------------------------------------------------------- */
+
+.slots-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--slots-gap);
+  margin-top: var(--slots-space);
+}
+
+.slots-nav button {
+  padding: 10px 20px;
+  border-radius: var(--slots-radius);
+  border: var(--slots-border-width) solid var(--slots-primary);
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: var(--slots-tracking);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.slots-nav [data-slots-action='next'],
+.slots-nav [data-slots-action='submit'] {
+  background: var(--slots-primary);
+  color: var(--slots-on-primary);
+  margin-inline-start: auto;
+}
+
+.slots-nav [data-slots-action='back'] {
+  background: var(--slots-bg);
+  color: var(--slots-fg);
+}
+
+.slots-nav [data-slots-action='back']:hover {
+  background: var(--slots-primary);
+  color: var(--slots-on-primary);
+}
+
+/* --- Booking-management (?manage=) view --------------------------------- */
+
+.slots-manage-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--slots-gap);
+  margin-top: var(--slots-space);
+}
+
+.slots-manage-cancel {
+  padding: 10px 20px;
+  border-radius: var(--slots-radius);
+  border: var(--slots-border-width) solid var(--slots-error);
+  background: var(--slots-bg);
+  color: var(--slots-error);
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: var(--slots-tracking);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  margin-inline-start: auto;
+}
+
+.slots-manage-cancel:hover {
+  background: var(--slots-error);
+  color: var(--slots-on-primary);
+}
+
+.slots-manage-cancelled {
+  color: var(--slots-error);
+  font-weight: 700;
+}
+
+.slots-wizard button:focus-visible {
+  outline: var(--slots-border-width) solid var(--slots-accent);
+  outline-offset: 2px;
+}

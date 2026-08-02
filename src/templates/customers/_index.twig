@@ -1,0 +1,103 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsCpAsset") %}
+
+{% set title = 'titles.customers'|t('slots') %}
+{% set selectedSubnavItem = 'customers' %}
+
+{% macro sortLink(column, label, sort, dir, search) %}
+    {%- set nextDir = (sort == column and dir == 'desc') ? 'asc' : 'desc' -%}
+    {%- set params = { sort: column, dir: nextDir } -%}
+    {%- if search %}{% set params = params|merge({ search: search }) %}{% endif -%}
+    <a href="{{ url('slots/customers', params) }}">
+        {{- label -}}
+        {%- if sort == column %}<span class="sort-indicator"> {{ dir == 'asc' ? '↑' : '↓' }}</span>{% endif -%}
+    </a>
+{% endmacro %}
+
+{% block content %}
+    <form method="get" action="{{ url('slots/customers') }}" class="slots-customers-search">
+        {{ forms.text({
+            name: 'search',
+            value: search,
+            placeholder: 'customers.searchPlaceholder'|t('slots'),
+            autocomplete: false,
+        }) }}
+        <button type="submit" class="btn">{{ 'labels.filter'|t('slots') }}</button>
+        {% if search %}
+            <a class="btn" href="{{ url('slots/customers') }}">{{ 'buttons.clear'|t('slots') }}</a>
+        {% endif %}
+    </form>
+
+    {% if customers|length %}
+        <div class="tableview">
+            <table class="data fullwidth">
+                <thead>
+                    <tr>
+                        <th>{{ _self.sortLink('name', 'labels.name'|t('slots'), sort, dir, search) }}</th>
+                        <th>{{ _self.sortLink('email', 'labels.email'|t('slots'), sort, dir, search) }}</th>
+                        <th>{{ 'labels.phone'|t('slots') }}</th>
+                        <th>{{ _self.sortLink('totalBookings', 'customers.bookings'|t('slots'), sort, dir, search) }}</th>
+                        <th>{{ 'customers.upcoming'|t('slots') }}</th>
+                        <th>{{ _self.sortLink('lastBooking', 'customers.lastBooking'|t('slots'), sort, dir, search) }}</th>
+                        <th>{{ 'customers.totalPaid'|t('slots') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for customer in customers %}
+                        <tr>
+                            <td>
+                                <a href="{{ url('slots/customers/' ~ customer.email|url_encode) }}">
+                                    {{ customer.name ?: 'labels.na'|t('slots') }}
+                                </a>
+                                {% if customer.userId %}
+                                    <span class="status green" title="{{ 'customers.hasAccount'|t('slots') }}"></span>
+                                {% endif %}
+                            </td>
+                            <td><code>{{ customer.email }}</code></td>
+                            <td>{{ customer.phone ?: '—' }}</td>
+                            <td>
+                                {{ customer.totalBookings }}
+                                {% if customer.cancelledBookings %}
+                                    <span class="light">({{ 'customers.cancelledCount'|t('slots', { count: customer.cancelledBookings }) }})</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ customer.upcomingBookings ?: '—' }}</td>
+                            <td>{{ customer.lastBooking ? customer.lastBooking|date('medium') : '—' }}</td>
+                            <td>
+                                {%- if customer.paidMinorUnits -%}
+                                    {{ (customer.paidMinorUnits / 100)|currency(customer.currency) }}
+                                {%- else -%}
+                                    —
+                                {%- endif -%}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if totalPages > 1 %}
+            <div class="slots-pagination">
+                {% set pageParams = search ? { search: search, sort: sort, dir: dir } : { sort: sort, dir: dir } %}
+                {% if page > 1 %}
+                    <a class="btn" href="{{ url('slots/customers', pageParams|merge({ page: page - 1 })) }}">
+                        {{ 'calendar.previous'|t('slots') }}
+                    </a>
+                {% endif %}
+                <span class="light">{{ 'customers.pageOf'|t('slots', { page: page, total: totalPages }) }}</span>
+                {% if page < totalPages %}
+                    <a class="btn" href="{{ url('slots/customers', pageParams|merge({ page: page + 1 })) }}">
+                        {{ 'calendar.next'|t('slots') }}
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <p class="light">{{ 'customers.totalCount'|t('slots', { count: total }) }}</p>
+    {% else %}
+        <div class="zilch">
+            <p>{{ search ? 'customers.noneMatching'|t('slots') : 'customers.none'|t('slots') }}</p>
+        </div>
+    {% endif %}
+{% endblock %}

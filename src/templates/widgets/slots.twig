@@ -1,0 +1,52 @@
+{% set dayLabel = lookaheadDays == 1 ? 'widget.today'|t('slots') : 'widget.nextDays'|t('slots', { days: lookaheadDays }) %}
+
+<div class="slots-widget">
+    <div class="slots-widget-stats" style="display: flex; gap: 12px; margin-bottom: 16px;">
+        <div style="flex: 1; text-align: center; padding: 8px; background: var(--ui-control-bg-color); border-radius: 6px;">
+            <div style="font-size: 20px; font-weight: 600;">{{ totalCount }}</div>
+            <div class="light" style="font-size: 11px;">{{ 'widget.total'|t('slots') }}</div>
+        </div>
+        <div style="flex: 1; text-align: center; padding: 8px; background: var(--ui-control-bg-color); border-radius: 6px;">
+            <div style="font-size: 20px; font-weight: 600; color: var(--green-600);">{{ confirmedCount }}</div>
+            <div class="light" style="font-size: 11px;">{{ 'status.confirmed'|t('slots') }}</div>
+        </div>
+        <div style="flex: 1; text-align: center; padding: 8px; background: var(--ui-control-bg-color); border-radius: 6px;">
+            <div style="font-size: 20px; font-weight: 600; color: var(--orange-500);">{{ pendingCount }}</div>
+            <div class="light" style="font-size: 11px;">{{ 'status.pending'|t('slots') }}</div>
+        </div>
+    </div>
+
+    {% if upcoming | length %}
+        <table class="data fullwidth">
+            <thead>
+                <tr>
+                    <th>{{ 'reservation.name'|t('slots') }}</th>
+                    <th>{{ 'reservation.dateTime'|t('slots') }}</th>
+                    <th>{{ 'labels.status'|t('slots') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in upcoming %}
+                    <tr>
+                        <td>
+                            <a href="{{ r.getCpEditUrl() }}">{{ r.getUserName() }}</a>
+                        </td>
+                        <td class="light">
+                            {{ r.getBookingDate()|date('short') }}
+                            {{ r.getStartTime() }}
+                        </td>
+                        <td>
+                            {% set _wColors = {confirmed: 'green', pending: 'orange', cancelled: '', no_show: 'red'} %}
+                            <span class="status {{ _wColors[r.getStatus()] ?? '' }}"></span>
+                            {{ r.getStatusLabel() }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="light" style="text-align: center; padding: 16px 0;">
+            {{ 'widget.noBookings'|t('slots') }}
+        </p>
+    {% endif %}
+</div>

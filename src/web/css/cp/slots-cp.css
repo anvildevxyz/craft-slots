@@ -1,0 +1,2003 @@
+/**
+ * Slots Control Panel Styles
+ */
+
+/* ==========================================================================
+   ACTION BUTTONS — add spacing between form-wrapped buttons
+   ========================================================================== */
+
+#action-buttons .btngroup {
+    gap: 7px;
+}
+
+/* ==========================================================================
+   UTILITY CLASSES
+   ========================================================================== */
+
+/* Grid Layouts */
+.slots-grid-auto,
+.slots-grid-2,
+.slots-grid-3,
+.slots-grid-4 {
+    display: grid;
+    gap: 20px;
+}
+
+.slots-grid-auto { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+.slots-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.slots-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.slots-grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+/* Flex Layouts */
+.slots-flex {
+    display: flex;
+}
+
+.slots-flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.slots-flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.slots-flex-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.slots-gap-8 { gap: 8px; }
+.slots-gap-12 { gap: 12px; }
+.slots-gap-16 { gap: 16px; }
+.slots-gap-20 { gap: 20px; }
+.slots-gap-24 { gap: 24px; }
+
+/* Spacing */
+.slots-mb-8 { margin-bottom: 8px; }
+.slots-mb-12 { margin-bottom: 12px; }
+.slots-mb-16 { margin-bottom: 16px; }
+.slots-mb-20 { margin-bottom: 20px; }
+.slots-mb-24 { margin-bottom: 24px; }
+.slots-mb-32 { margin-bottom: 32px; }
+
+.slots-mt-8 { margin-top: 8px; }
+.slots-mt-12 { margin-top: 12px; }
+.slots-mt-14 { margin-top: 14px; }
+.slots-mt-16 { margin-top: 16px; }
+.slots-mt-24 { margin-top: 24px; }
+.slots-mt-32 { margin-top: 32px; }
+
+.slots-ml-7 { margin-left: 7px; }
+.slots-mx-4 { margin-left: 4px; margin-right: 4px; }
+.slots-py-14 { padding-top: 14px; padding-bottom: 14px; }
+
+.slots-p-12 { padding: 12px; }
+.slots-p-16 { padding: 16px; }
+.slots-p-20 { padding: 20px; }
+.slots-p-24 { padding: 24px; }
+.slots-p-32 { padding: 32px; }
+
+/* Text */
+.slots-text-center { text-align: center; }
+.slots-text-right { text-align: right; }
+.slots-text-muted { color: #6b7280; }
+.slots-text-light { color: #9ca3af; }
+.slots-text-dark { color: #374151; }
+
+.slots-text-sm { font-size: 12px; }
+.slots-text-base { font-size: 14px; }
+.slots-text-lg { font-size: 16px; }
+.slots-text-xl { font-size: 18px; }
+.slots-text-2xl { font-size: 24px; }
+.slots-text-3xl { font-size: 32px; }
+.slots-text-4xl { font-size: 48px; }
+
+.slots-font-medium { font-weight: 500; }
+.slots-font-semibold { font-weight: 600; }
+.slots-font-bold { font-weight: bold; }
+
+/* Width */
+.slots-w-full { width: 100%; }
+
+/* Inline Block */
+.inline-block { display: inline-block; }
+
+/* Specific widths */
+.slots-header-name-input { width: 200px; }
+
+/* Info Box for settings */
+.slots-settings-info {
+    background: #f9fafb;
+    padding: 20px;
+    border-radius: 4px;
+}
+
+/* Variables Info Box */
+.slots-variables-box {
+    background: #f0f9ff;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+}
+
+.slots-variables-box p {
+    margin: 0;
+    font-size: 13px;
+}
+
+.slots-variables-box code {
+    font-size: 12px;
+}
+
+.slots-variables-note {
+    margin: 8px 0 0 0;
+    font-size: 12px;
+    color: #666;
+}
+
+/* Test Result Box */
+.slots-test-result {
+    margin-top: 12px;
+    display: none;
+}
+
+.slots-test-result pre {
+    background: #f5f5f5;
+    padding: 12px;
+    border-radius: 4px;
+    white-space: pre-wrap;
+    font-size: 12px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+/* ==========================================================================
+   CARD COMPONENTS
+   ========================================================================== */
+
+/* Base Card & KPI Card */
+.slots-card,
+.slots-kpi-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.slots-card-lg {
+    padding: 24px;
+}
+
+/* Shared numeral styling */
+.slots-kpi-value,
+.slots-kpi-value-xl,
+.slots-kpi-value-lg,
+.slots-summary-value,
+.slots-employee-count {
+    font-weight: 600;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-variant-numeric: tabular-nums;
+}
+
+.slots-kpi-value {
+    font-size: 32px;
+    line-height: 1.1;
+    margin-bottom: 4px;
+}
+
+.slots-kpi-value-xl {
+    font-size: 48px;
+}
+
+.slots-kpi-footer {
+    color: #9ca3af;
+    font-size: 12px;
+    margin-top: 8px;
+}
+
+/* KPI Value Colors */
+.slots-kpi-value.color-success,
+.slots-kpi-value-xl.color-success,
+.slots-kpi-value-lg.color-success,
+.slots-color-success { color: #10b981; }
+.slots-kpi-value.color-primary,
+.slots-kpi-value-xl.color-primary,
+.slots-kpi-value-lg.color-primary,
+.slots-color-primary { color: #3b82f6; }
+.slots-kpi-value.color-warning,
+.slots-kpi-value-xl.color-warning,
+.slots-kpi-value-lg.color-warning,
+.slots-color-warning { color: #f59e0b; }
+.slots-kpi-value.color-danger,
+.slots-kpi-value-xl.color-danger,
+.slots-kpi-value-lg.color-danger,
+.slots-color-danger { color: #ef4444; }
+.slots-kpi-value.color-purple,
+.slots-kpi-value-xl.color-purple,
+.slots-kpi-value-lg.color-purple,
+.slots-color-purple { color: #8b5cf6; }
+.slots-kpi-value.color-teal,
+.slots-kpi-value-xl.color-teal,
+.slots-kpi-value-lg.color-teal,
+.slots-color-teal { color: #059669; }
+
+/* Report Card (for reports index) */
+.report-card {
+    display: block;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 24px;
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.report-card:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
+    transition: box-shadow 0.2s, transform 0.2s;
+    text-decoration: none;
+}
+
+.report-card-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+}
+
+.report-card-content > div:last-child {
+    min-width: 0;
+}
+
+.report-card-icon {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.report-card-icon.bg-green { background: #d1fae5; }
+.report-card-icon.bg-blue { background: #dbeafe; }
+.report-card-icon.bg-yellow { background: #fef3c7; }
+.report-card-icon.bg-red { background: #fee2e2; }
+.report-card-icon.bg-purple { background: #e9d5ff; }
+.report-card-icon.bg-orange { background: #ffedd5; }
+.report-card-icon.bg-teal { background: #ccfbf1; }
+.report-card-icon.bg-indigo { background: #e0e7ff; }
+.report-card-icon.bg-cyan { background: #cffafe; }
+.report-card-icon.bg-amber { background: #fef3c7; }
+.report-card-icon.bg-pink { background: #fce7f3; }
+
+.report-card-title {
+    margin: 0;
+    font-size: 18px;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    text-decoration: none;
+}
+
+.report-card:hover .report-card-title {
+    text-decoration: none;
+}
+
+.report-card-desc {
+    margin: 4px 0 0 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* ==========================================================================
+   STATUS BADGES
+   ========================================================================== */
+
+.slots-status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.slots-status-badge.status-confirmed {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.slots-status-badge.status-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.slots-status-badge.status-cancelled {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.slots-status-badge.status-no_show {
+    background: #fecaca;
+    color: #7f1d1d;
+}
+
+.slots-status-badge.status-default {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+/* ==========================================================================
+   ALERT BOXES
+   ========================================================================== */
+
+.slots-alert {
+    padding: 16px;
+    border-radius: 12px;
+    border-left: 4px solid;
+}
+
+.slots-alert-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.slots-alert-text {
+    font-size: 14px;
+}
+
+.slots-alert.alert-success {
+    background: #d1fae5;
+    border-color: #10b981;
+}
+.slots-alert.alert-success .slots-alert-title { color: #065f46; }
+.slots-alert.alert-success .slots-alert-text { color: #064e3b; }
+
+.slots-alert.alert-warning {
+    background: #fef3c7;
+    border-color: #f59e0b;
+}
+.slots-alert.alert-warning .slots-alert-title { color: #92400e; }
+.slots-alert.alert-warning .slots-alert-text { color: #78350f; }
+
+.slots-alert.alert-danger {
+    background: #fee2e2;
+    border-color: #ef4444;
+}
+.slots-alert.alert-danger .slots-alert-title { color: #991b1b; }
+.slots-alert.alert-danger .slots-alert-text { color: #7f1d1d; }
+
+.slots-alert.alert-info {
+    background: #f0f9ff;
+    border-color: #3b82f6;
+}
+.slots-alert.alert-info .slots-alert-title { color: #1e40af; }
+.slots-alert.alert-info .slots-alert-text { color: #1e3a8a; }
+
+/* Info Box (no left border) */
+.slots-info-box {
+    padding: 12px;
+    background: #f0f9ff;
+    border-radius: 8px;
+}
+
+/* ==========================================================================
+   PROGRESS BARS
+   ========================================================================== */
+
+.slots-progress-bar {
+    background: #e5e7eb;
+    height: 12px;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.slots-progress-bar.size-sm { height: 8px; }
+.slots-progress-bar.size-lg { height: 24px; }
+
+.slots-progress-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.slots-progress-fill.color-primary { background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%); }
+.slots-progress-fill.color-success { background: linear-gradient(90deg, #10b981 0%, #34d399 100%); }
+.slots-progress-fill.color-purple { background: linear-gradient(90deg, #8b5cf6 0%, #a78bfa 100%); }
+.slots-progress-fill.color-teal { background: linear-gradient(90deg, #059669 0%, #10b981 100%); }
+.slots-progress-fill.color-danger { background: linear-gradient(90deg, #ef4444 0%, #f87171 100%); }
+
+/* ==========================================================================
+   LIST ITEMS
+   ========================================================================== */
+
+.slots-list-item {
+    padding: 12px;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.slots-list-item:last-child {
+    border-bottom: none;
+}
+
+.slots-list-item-lg {
+    padding: 16px;
+}
+
+/* ==========================================================================
+   ACTIVITY/RESERVATION ITEMS
+   ========================================================================== */
+
+.slots-activity-item {
+    padding: 12px;
+    border-bottom: 1px solid #f3f4f6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.slots-activity-email {
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.slots-activity-date {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 4px;
+}
+
+/* ==========================================================================
+   WIDGET HEADERS
+   ========================================================================== */
+
+.slots-widget-title-sm {
+    margin: 0 0 20px 0;
+    font-size: 16px;
+}
+
+/* ==========================================================================
+   EMPTY STATES
+   ========================================================================== */
+
+.slots-empty-state {
+    text-align: center;
+    color: #9ca3af;
+    padding: 40px 0;
+}
+
+.slots-empty-state-lg {
+    padding: 60px 0;
+}
+
+/* ==========================================================================
+   SCROLLABLE CONTAINERS
+   ========================================================================== */
+
+.slots-scrollable {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* ==========================================================================
+   REPORT TOOLBAR
+   ========================================================================== */
+
+.slots-report-toolbar {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 24px;
+}
+
+.slots-report-toolbar .field {
+    margin: 0 !important;
+    flex: 0 0 auto;
+}
+
+.slots-report-toolbar .field .heading {
+    margin-bottom: 4px;
+}
+
+.slots-report-toolbar .field .heading label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.slots-report-toolbar .btn.submit {
+    margin-bottom: 0;
+    align-self: flex-end;
+    white-space: nowrap;
+}
+
+.slots-report-toolbar .slots-toolbar-spacer {
+    flex: 1;
+}
+
+.slots-report-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+@media (max-width: 768px) {
+    .slots-report-toolbar {
+        flex-wrap: wrap;
+    }
+
+    .slots-report-toolbar .field {
+        flex: 1 1 auto;
+        min-width: 140px;
+    }
+
+    .slots-report-toolbar .slots-toolbar-spacer {
+        display: none;
+    }
+}
+
+/* ==========================================================================
+   SUMMARY/REVENUE CARDS
+   ========================================================================== */
+
+.slots-summary-card {
+    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    border-radius: 12px;
+    padding: 32px;
+    color: white;
+}
+
+.slots-summary-card.summary-blue { background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); }
+.slots-summary-card.summary-indigo { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); }
+.slots-summary-card.summary-teal { background: linear-gradient(135deg, #059669 0%, #047857 100%); }
+.slots-summary-card.summary-purple { background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); }
+.slots-summary-card.summary-red { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+.slots-summary-card.summary-amber { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
+.slots-summary-card.summary-violet { background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); }
+.slots-summary-card.summary-pink { background: linear-gradient(135deg, #ec4899 0%, #db2777 100%); }
+.slots-summary-card.summary-emerald { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+
+.slots-summary-label {
+    font-size: 14px;
+    opacity: 0.9;
+    margin-bottom: 12px;
+}
+
+.slots-summary-value {
+    font-size: 48px;
+    line-height: 1.1;
+    margin-bottom: 12px;
+}
+
+.slots-summary-date {
+    font-size: 14px;
+    opacity: 0.8;
+    margin-top: 8px;
+}
+
+/* ==========================================================================
+   DATA TABLES ENHANCEMENTS
+   ========================================================================== */
+
+.slots-table-wrapper {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.slots-table-wrapper tbody tr:hover {
+    background: #f9fafb;
+}
+
+/* ==========================================================================
+   PEAK HOURS REPORT
+   ========================================================================== */
+
+.slots-hour-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.slots-hour-label {
+    width: 80px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.slots-hour-bar-container {
+    flex: 1;
+    position: relative;
+}
+
+.slots-hour-bar {
+    background: #e5e7eb;
+    height: 36px;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.slots-hour-bar-fill {
+    background: linear-gradient(90deg, #8b5cf6 0%, #a78bfa 100%);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    transition: width 0.3s ease;
+}
+
+.slots-hour-count-external {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: 600;
+    color: #374151;
+    font-size: 14px;
+}
+
+/* ==========================================================================
+   CANCELLATION RATE INDICATOR
+   ========================================================================== */
+
+.slots-rate-indicator {
+    background: #e5e7eb;
+    height: 24px;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+}
+
+.slots-rate-zone {
+    position: absolute;
+    height: 100%;
+}
+
+.slots-rate-zone.zone-good { left: 0; width: 33.33%; background: #10b981; }
+.slots-rate-zone.zone-moderate { left: 33.33%; width: 33.33%; background: #f59e0b; }
+.slots-rate-zone.zone-bad { left: 66.66%; width: 33.34%; background: #ef4444; }
+
+.slots-rate-marker {
+    position: absolute;
+    top: -8px;
+    transform: translateX(-50%);
+}
+
+.slots-rate-marker-line {
+    width: 4px;
+    height: 40px;
+    background: #1f2937;
+    border-radius: 2px;
+}
+
+.slots-rate-marker-label {
+    position: absolute;
+    top: -24px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-weight: 600;
+    font-size: 14px;
+    color: #1f2937;
+}
+
+.slots-rate-scale {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.slots-notice {
+    padding: 16px 20px;
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+.slots-notice.color-danger {
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.slots-notice.color-warning {
+    background: #fffbeb;
+    border-color: #fde68a;
+}
+
+.slots-notice.color-success {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+.slots-notice p {
+    margin: 4px 0 0;
+    font-size: 14px;
+    color: #6b7280;
+}
+
+/* ==========================================================================
+   EMPLOYEE PERFORMANCE CARDS
+   ========================================================================== */
+
+.slots-employee-card {
+    padding: 20px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+}
+
+.slots-employee-name {
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.slots-employee-stats {
+    text-align: center;
+    background: #dbeafe;
+    padding: 12px 24px;
+    border-radius: 8px;
+}
+
+.slots-employee-count {
+    font-size: 32px;
+    color: #1e40af;
+}
+
+.slots-employee-count-label {
+    font-size: 12px;
+    color: #1e40af;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+/* ==========================================================================
+   WEBHOOK LOGS
+   ========================================================================== */
+
+.slots-log-summary-stats {
+    display: flex;
+    gap: 32px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.slots-log-summary-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.slots-log-summary-stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: white;
+}
+
+.slots-log-summary-stat-label {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.slots-logs-table code.slots-log-event-code {
+    font-size: 12px;
+    padding: 2px 8px;
+    background: #f3f4f6;
+    border-radius: 4px;
+    color: #374151;
+}
+
+.slots-log-http-code {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.slots-log-http-code.code-success {
+    color: #059669;
+    background: #d1fae5;
+}
+
+.slots-log-http-code.code-error {
+    color: #dc2626;
+    background: #fee2e2;
+}
+
+.slots-log-details-pane {
+    margin: 8px 0;
+}
+
+.slots-log-detail-heading {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 8px;
+}
+
+.slots-log-error-box {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #dc2626;
+    font-size: 13px;
+}
+
+.slots-code-block {
+    max-height: 300px;
+    overflow: auto;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 11px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: #374151;
+}
+
+/* ==========================================================================
+   CALENDAR VIEWS
+   ========================================================================== */
+
+/* Calendar Layout */
+.slots-calendar-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 24px;
+}
+
+/* Calendar Header */
+.slots-calendar-header {
+    margin-bottom: 24px;
+}
+
+.slots-calendar-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.slots-view-switcher {
+    display: flex;
+    gap: 8px;
+}
+
+.slots-view-switcher .btn.active {
+    background: #0d78f2;
+    color: white;
+}
+
+/* Mini Calendar */
+.mini-calendar {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 16px;
+}
+
+.mini-calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.mini-calendar-title {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.mini-calendar-nav {
+    padding: 4px 8px;
+    min-width: auto;
+}
+
+.mini-calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+    text-align: center;
+}
+
+.mini-calendar-day-header {
+    font-size: 11px;
+    font-weight: 600;
+    color: #6b7280;
+    padding: 4px 0;
+}
+
+.mini-calendar-day-empty {
+    padding: 6px;
+    font-size: 12px;
+}
+
+.mini-calendar-day {
+    display: block;
+    padding: 6px 2px;
+    font-size: 12px;
+    text-decoration: none;
+    border-radius: 4px;
+    position: relative;
+    color: #374151;
+    transition: background-color 0.15s ease;
+}
+
+.mini-calendar-day:hover {
+    background-color: #f3f4f6;
+}
+
+.mini-calendar-day.is-today {
+    background: #dbeafe;
+    color: #1e40af;
+    font-weight: 600;
+}
+
+.mini-calendar-day.is-selected {
+    background: #3b82f6;
+    color: white;
+    font-weight: 600;
+}
+
+.mini-calendar-day.is-selected:hover {
+    background: #2563eb;
+}
+
+.mini-calendar-indicator {
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    background: #3b82f6;
+    border-radius: 50%;
+}
+
+.mini-calendar-day.is-today .mini-calendar-indicator,
+.mini-calendar-day.is-selected .mini-calendar-indicator {
+    background: currentColor;
+}
+
+.mini-calendar-footer {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.mini-calendar-today-btn {
+    width: 100%;
+    text-align: center;
+    display: block;
+}
+
+.mini-calendar-summary {
+    margin-top: 12px;
+    padding: 8px;
+    background: #f9fafb;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #6b7280;
+    text-align: center;
+}
+
+.mini-calendar-summary strong {
+    color: #374151;
+}
+
+/* Month View Calendar Grid */
+.slots-month-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: #e5e7eb;
+}
+
+.slots-month-header-cell {
+    background: #f3f4f6;
+    padding: 8px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.slots-month-day-cell {
+    background: white;
+    padding: 8px;
+    min-height: 100px;
+    border: 1px solid #e5e7eb;
+    position: relative;
+}
+
+.slots-month-day-cell.is-empty {
+    background: white;
+}
+
+.slots-month-day-number {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 4px;
+    color: #374151;
+    text-decoration: none;
+    padding: 2px 4px;
+    border-radius: 3px;
+    transition: background-color 0.15s;
+}
+
+.slots-month-day-number:hover {
+    background-color: #f3f4f6;
+}
+
+.slots-month-more {
+    font-size: 10px;
+    color: #6b7280;
+    margin-top: 4px;
+    padding-left: 4px;
+}
+
+/* Week View */
+.slots-week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 12px;
+}
+
+.slots-week-day {
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 12px;
+}
+
+.slots-week-day-header {
+    font-weight: bold;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.slots-week-day-number {
+    font-size: 20px;
+}
+
+.slots-week-day-content {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 8px;
+}
+
+.slots-week-empty {
+    text-align: center;
+    color: #9ca3af;
+    padding: 20px 0;
+    font-size: 12px;
+}
+
+/* Day View */
+.slots-day-schedule {
+    max-width: 800px;
+}
+
+.slots-day-hour-row {
+    display: flex;
+    border-bottom: 1px solid #e5e7eb;
+    min-height: 60px;
+}
+
+.slots-day-hour-label {
+    width: 80px;
+    padding: 12px;
+    font-weight: bold;
+    color: #6b7280;
+    flex-shrink: 0;
+}
+
+.slots-day-hour-content {
+    flex: 1;
+    padding: 8px;
+}
+
+.slots-day-available {
+    color: #d1d5db;
+    padding: 12px;
+    font-style: italic;
+    font-size: 13px;
+}
+
+/* Calendar Booking Cards */
+.calendar-booking {
+    padding: 4px 6px;
+    margin: 2px 0;
+    border-radius: 3px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    text-decoration: none;
+    display: block;
+    color: inherit;
+}
+
+.calendar-booking:hover {
+    opacity: 0.9;
+    transform: translateX(2px);
+}
+
+.calendar-booking-hidden {
+    display: none !important;
+}
+
+.calendar-booking-time {
+    font-weight: 600;
+    color: #111827;
+}
+
+.calendar-booking-name {
+    color: #374151;
+    font-size: 10px;
+    margin-top: 1px;
+}
+
+.calendar-booking-service {
+    color: #6b7280;
+    font-size: 9px;
+    margin-top: 1px;
+}
+
+/* Booking status colors */
+.calendar-booking.status-confirmed,
+.slots-reservation-card.status-confirmed {
+    background: #d1fae5;
+    border-left: 3px solid #10b981;
+}
+
+.calendar-booking.status-pending,
+.slots-reservation-card.status-pending {
+    background: #fef3c7;
+    border-left: 3px solid #f59e0b;
+}
+
+.calendar-booking.status-cancelled,
+.slots-reservation-card.status-cancelled {
+    background: #fee2e2;
+    border-left: 3px solid #ef4444;
+}
+
+.calendar-booking.status-no_show,
+.slots-reservation-card.status-no_show {
+    background: #fecaca;
+    border-left: 3px solid #dc2626;
+}
+
+.slots-reservation-card {
+    padding: 8px 12px;
+    margin: 4px 0;
+    border-radius: 4px;
+}
+
+.slots-reservation-card.status-default {
+    background: #e5e7eb;
+    border-left: 4px solid #9ca3af;
+}
+
+.slots-reservation-time {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.slots-reservation-customer {
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.slots-reservation-service {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 2px;
+}
+
+.slots-reservation-actions {
+    margin-top: 6px;
+}
+
+/* Calendar Legend */
+.calendar-legend {
+    margin-top: 24px;
+    padding: 16px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.calendar-legend h3 {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.calendar-legend-items {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.calendar-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    user-select: none;
+}
+
+.calendar-legend-item:hover {
+    background-color: #f3f4f6;
+}
+
+.calendar-legend-item.calendar-legend-inactive {
+    opacity: 0.5;
+    text-decoration: line-through;
+}
+
+.calendar-legend-color {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.calendar-legend-color.status-confirmed {
+    background: #d1fae5;
+    border: 1px solid #10b981;
+}
+
+.calendar-legend-color.status-cancelled {
+    background: #fee2e2;
+    border: 1px solid #ef4444;
+}
+
+.calendar-legend-color.status-no_show {
+    background: #fecaca;
+    border: 1px solid #dc2626;
+}
+
+.calendar-legend-label {
+    font-size: 13px;
+    color: #374151;
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 1024px) {
+    .slots-grid-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .slots-grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .slots-calendar-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .slots-grid-2,
+    .slots-grid-3,
+    .slots-grid-4 {
+        grid-template-columns: 1fr;
+    }
+    
+    .slots-flex-between {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+}
+
+/* ==========================================================================
+   TEST CONNECTION RESULTS
+   ========================================================================== */
+
+.test-result {
+    display: inline-block;
+    margin-left: 12px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.test-result.test-success {
+    color: #059669;
+}
+
+.test-result.test-error {
+    color: #dc2626;
+}
+
+/* ==========================================================================
+   DASHBOARD - NEXT UP BANNER
+   ========================================================================== */
+
+.slots-next-up {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    border-radius: 12px;
+    padding: 20px 24px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.slots-next-up-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.slots-next-up-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.85;
+    font-weight: 600;
+}
+
+.slots-next-up-countdown {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.slots-next-up-divider {
+    width: 1px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.slots-next-up-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.slots-next-up-service {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.slots-next-up-meta {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.slots-next-up-action .btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.slots-next-up-action .btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.slots-next-up-empty {
+    background: #f3f4f6;
+    border: 2px dashed #d1d5db;
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    color: #6b7280;
+    margin-bottom: 24px;
+}
+
+.slots-next-up-empty-text {
+    font-size: 15px;
+}
+
+/* Shared dashboard card base (12px radius) */
+.slots-kpi-card-enhanced,
+.slots-avg-value-card,
+.slots-quick-actions-card,
+.slots-widget-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+/* ==========================================================================
+   DASHBOARD - KPI CARDS WITH SPARKLINES
+   ========================================================================== */
+
+.slots-kpi-card-enhanced {
+    display: flex;
+    flex-direction: column;
+    min-height: 140px;
+}
+
+.slots-kpi-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.slots-kpi-label {
+    color: #6b7280;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.slots-kpi-main {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.slots-kpi-value-lg {
+    font-size: 36px;
+    line-height: 1;
+    color: #111827;
+}
+
+.slots-kpi-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.slots-kpi-trend.trend-up {
+    color: #059669;
+    background: #d1fae5;
+}
+
+.slots-kpi-trend.trend-down {
+    color: #dc2626;
+    background: #fee2e2;
+}
+
+.slots-kpi-trend.trend-neutral {
+    color: #6b7280;
+    background: #f3f4f6;
+}
+
+.slots-kpi-trend-arrow {
+    font-size: 10px;
+}
+
+.slots-kpi-sparkline {
+    flex-grow: 1;
+    display: flex;
+    align-items: flex-end;
+    min-height: 32px;
+}
+
+.slots-kpi-sparkline svg {
+    width: 100%;
+    height: 32px;
+}
+
+.slots-kpi-footer-link {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #f3f4f6;
+}
+
+.slots-kpi-footer-link a {
+    color: #3b82f6;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.slots-kpi-footer-link a:hover {
+    text-decoration: underline;
+}
+
+/* Pending card special styling */
+.slots-kpi-card-enhanced.kpi-pending {
+    border-color: #fbbf24;
+    background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+}
+
+.slots-kpi-card-enhanced.kpi-pending .slots-kpi-value-lg {
+    color: #d97706;
+}
+
+/* ==========================================================================
+   DASHBOARD - SPARKLINE COLORS
+   ========================================================================== */
+
+.sparkline-bookings {
+    stroke: #3b82f6;
+    fill: url(#sparkline-gradient-blue);
+}
+
+.sparkline-revenue {
+    stroke: #059669;
+    fill: url(#sparkline-gradient-green);
+}
+
+/* ==========================================================================
+   DASHBOARD - AVERAGE VALUE CARD
+   ========================================================================== */
+
+.slots-avg-value-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.slots-avg-value-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+}
+
+.slots-avg-value-content {
+    flex: 1;
+}
+
+.slots-avg-value-label {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 4px;
+}
+
+.slots-avg-value-amount {
+    font-size: 24px;
+    font-weight: 700;
+    color: #111827;
+}
+
+/* ==========================================================================
+   DASHBOARD - QUICK ACTIONS CARD
+   ========================================================================== */
+
+.slots-quick-actions-title {
+    font-size: 13px;
+    color: #6b7280;
+    margin-bottom: 12px;
+    font-weight: 500;
+}
+
+.slots-quick-actions-grid {
+    display: flex;
+    gap: 8px;
+}
+
+.slots-quick-actions-grid .btn {
+    flex: 1;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* ==========================================================================
+   DASHBOARD - WIDGET IMPROVEMENTS
+   ========================================================================== */
+
+.slots-widget-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.slots-widget-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+}
+
+/* ==========================================================================
+   FIX: Horizontal scroll on KPI cards
+   ========================================================================== */
+
+.slots-kpi-card,
+.slots-kpi-card-enhanced {
+    overflow: hidden;
+}
+
+.slots-kpi-value,
+.slots-kpi-value-xl,
+.slots-kpi-value-lg {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ==========================================================================
+   BOOKINGS INDEX
+   ========================================================================== */
+
+.slots-bookings-table {
+    margin: 14px 0;
+}
+
+/* ==========================================================================
+   BOOKING VIEW / DETAIL PAGE
+   ========================================================================== */
+
+.slots-detail-layout {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+.slots-detail-main {
+    flex: 2;
+}
+
+.slots-detail-sidebar {
+    flex: 1;
+    min-width: 250px;
+}
+
+.slots-detail-section {
+    margin-bottom: 0;
+}
+
+.slots-detail-section + .slots-detail-section {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.slots-detail-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+}
+
+.slots-detail-value {
+    font-size: 14px;
+    color: #111827;
+    line-height: 1.5;
+}
+
+.slots-detail-value strong {
+    font-weight: 600;
+}
+
+.slots-detail-value a {
+    color: #3b82f6;
+    text-decoration: none;
+}
+
+.slots-detail-value a:hover {
+    text-decoration: underline;
+}
+
+/* Token/Code display */
+.slots-token {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 11px;
+    background: #f3f4f6;
+    padding: 4px 8px;
+    border-radius: 4px;
+    word-break: break-all;
+    display: inline-block;
+    max-width: 100%;
+}
+
+/* Status display inline */
+.slots-status-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Sidebar select */
+.slots-sidebar-select {
+    width: 100%;
+}
+
+.slots-sidebar-select select {
+    width: 100%;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .slots-detail-layout {
+        flex-direction: column;
+    }
+
+    .slots-detail-sidebar {
+        width: 100%;
+        min-width: auto;
+    }
+}
+
+/* ==========================================================================
+   BOOKINGS INDEX
+   ========================================================================== */
+
+/* ==========================================================================
+   DAY-OF-WEEK HEATMAP
+   ========================================================================== */
+
+.slots-heatmap-grid {
+    display: grid;
+    grid-template-columns: 70px repeat(7, 1fr);
+    gap: 2px;
+}
+
+.slots-heatmap-cell {
+    padding: 8px 4px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 3px;
+    color: #374151;
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.slots-heatmap-cell[style*="rgba"] {
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.slots-heatmap-cell[style*="rgba(139, 92, 246, 0)"],
+.slots-heatmap-cell[style*="rgba(139, 92, 246, 0.0)"] {
+    color: #374151;
+    text-shadow: none;
+}
+
+.slots-heatmap-header {
+    font-weight: 600;
+    font-size: 12px;
+    color: #6b7280;
+    background: transparent;
+}
+
+.slots-heatmap-hour {
+    font-weight: 600;
+    font-size: 12px;
+    color: #374151;
+    justify-content: flex-end;
+    padding-right: 8px;
+}
+
+#bookings-filter-form {
+    margin-bottom: 14px;
+}
+
+/* ==========================================================================
+   BOOKING EDIT PAGE
+   ========================================================================== */
+
+/* Field headings */
+.slots-booking-edit #fields h2 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-color);
+    margin: 0 0 16px 0;
+    padding-top: 8px;
+}
+
+.slots-booking-edit #fields h2:not(:first-child) {
+    margin-top: 8px;
+}
+
+.slots-booking-edit #fields hr {
+    margin: 24px 0;
+    border: none;
+    border-top: 1px solid var(--hairline-color);
+}
+
+/* Flex field rows */
+.slots-booking-edit .flex-fields {
+    display: flex;
+    gap: 24px;
+    margin-top: 24px;
+}
+
+.slots-booking-edit .flex-fields:first-child {
+    margin-top: 0;
+}
+
+.slots-booking-edit .flex-fields > .field {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Booking details card */
+.slots-booking-edit #booking-details {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--gray-200);
+}
+
+.slots-booking-edit #booking-details h2 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 16px 0;
+}
+
+.slots-booking-edit .booking-card {
+    background: var(--gray-050);
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.slots-booking-edit .booking-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1px;
+    background: var(--gray-200);
+}
+
+.slots-booking-edit .booking-item {
+    background: var(--gray-050);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.slots-booking-edit .booking-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.slots-booking-edit .booking-value {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.slots-booking-edit .booking-meta {
+    font-size: 12px;
+    color: var(--gray-500);
+}
+
+.slots-booking-edit .booking-section {
+    padding: 16px;
+    border-top: 1px solid var(--gray-200);
+}
+
+.slots-booking-edit .booking-section .booking-label {
+    display: block;
+    margin-bottom: 12px;
+}
+
+/* Extras table */
+.slots-booking-edit .booking-extras-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.slots-booking-edit .booking-extras-table td {
+    padding: 8px 0;
+    border-bottom: 1px solid var(--gray-200);
+    font-size: 13px;
+}
+
+.slots-booking-edit .booking-extras-table tr:last-child td {
+    border-bottom: none;
+}
+
+.slots-booking-edit .booking-extras-table .extra-name {
+    color: var(--text-color);
+}
+
+.slots-booking-edit .booking-extras-table .extra-qty {
+    color: var(--gray-500);
+    margin-left: 6px;
+    font-size: 12px;
+}
+
+.slots-booking-edit .booking-extras-table .extra-price {
+    text-align: right;
+    color: var(--gray-600);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Price summary */
+.slots-booking-edit .booking-summary {
+    background: white;
+    padding: 16px;
+    border-top: 1px solid var(--gray-200);
+}
+
+.slots-booking-edit .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 13px;
+    color: var(--gray-600);
+}
+
+.slots-booking-edit .summary-row.total {
+    margin-top: 8px;
+    padding-top: 12px;
+    border-top: 1px solid var(--gray-200);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.slots-booking-edit .summary-row.total span:last-child {
+    color: #27ae60;
+}
+
+/* Meta info bar */
+.slots-booking-edit .booking-meta-info {
+    margin-top: 12px;
+    padding: 0 4px;
+    font-size: 12px;
+    color: var(--gray-500);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.slots-booking-edit .booking-meta-info .separator {
+    color: var(--gray-300);
+}
+
+.slots-booking-edit .booking-meta-info code {
+    background: var(--gray-100);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-family: var(--mono-font);
+}
+
+/* Read-only mode */
+.slots-booking-edit.slots-readonly #fields input,
+.slots-booking-edit.slots-readonly #fields select,
+.slots-booking-edit.slots-readonly #fields textarea {
+    pointer-events: none;
+    opacity: 0.7;
+}

@@ -1,0 +1,155 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsCpAsset") %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsSettingsAsset") %}
+
+{% set fullPageForm = true %}
+{% set selectedSubnavItem = 'settings' %}
+{% set selectedSettingsSubnavItem = 'notifications' %}
+{% set title = 'settings.notifications.title'|t('slots') %}
+
+{% block sidebar %}
+    {% include 'slots/settings/_sidebar' %}
+{% endblock %}
+
+{% block content %}
+    <form method="post" accept-charset="UTF-8" id="settings-form">
+        {{ csrfInput() }}
+        <input type="hidden" name="action" value="slots/cp/settings/save">
+        <input type="hidden" name="tab" value="notifications">
+        {{ redirectInput('slots/settings/notifications') }}
+
+        <h2 class="first">{{ 'settings.notifications.ownerTitle'|t('slots') }}</h2>
+        <p class="light">{{ 'settings.notifications.ownerDescription'|t('slots') }}</p>
+        <hr>
+        {{ forms.lightswitchField({
+            label: 'settings.notifications.enableOwner'|t('slots'),
+            instructions: 'settings.notifications.enableOwnerInstructions'|t('slots'),
+            id: 'ownerNotificationEnabled',
+            name: 'settings[ownerNotificationEnabled]',
+            on: settings.ownerNotificationEnabled
+        }) }}
+
+        {% set systemEmail = craft.app.projectConfig.get('email.fromEmail') %}
+        {% set systemName = craft.app.projectConfig.get('email.fromName') %}
+
+        {{ forms.textField({
+            label: 'settings.notifications.ownerEmail'|t('slots'),
+            instructions: 'settings.notifications.ownerEmailInstructions'|t('slots'),
+            id: 'ownerEmail',
+            name: 'settings[ownerEmail]',
+            value: settings.ownerEmail,
+            type: 'email',
+            placeholder: systemEmail ?? 'admin@example.com'
+        }) }}
+
+        {{ forms.textField({
+            label: 'settings.notifications.ownerName'|t('slots'),
+            instructions: 'settings.notifications.ownerNameInstructions'|t('slots'),
+            id: 'ownerName',
+            name: 'settings[ownerName]',
+            value: settings.ownerName,
+            placeholder: systemName ?? 'settings.notifications.ownerNamePlaceholder'|t('slots')
+        }) }}
+
+        {{ forms.textField({
+            label: 'settings.notifications.ownerSubject'|t('slots'),
+            instructions: 'settings.notifications.ownerSubjectInstructions'|t('slots'),
+            id: 'ownerNotificationSubject',
+            name: 'settings[ownerNotificationSubject]',
+            value: settings.ownerNotificationSubject,
+            placeholder: 'settings.notifications.ownerSubjectDefault'|t('slots')
+        }) }}
+
+        {% if craft.app.isMultiSite %}
+            {% set seenLanguages = {} %}
+            {% set languageOptions = [{label: 'settings.notifications.ownerLanguageDefault'|t('slots', { language: craft.app.sites.primarySite.language }), value: ''}] %}
+            {% for site in craft.app.sites.allSites %}
+                {% if site.language not in seenLanguages|keys %}
+                    {% set locale = craft.app.i18n.getLocaleById(site.language) %}
+                    {% set languageOptions = languageOptions|merge([{label: locale.displayName ~ ' (' ~ site.language ~ ')', value: site.language}]) %}
+                    {% set seenLanguages = seenLanguages|merge({ (site.language): true }) %}
+                {% endif %}
+            {% endfor %}
+            {{ forms.selectField({
+                label: 'settings.notifications.ownerLanguage'|t('slots'),
+                instructions: 'settings.notifications.ownerLanguageInstructions'|t('slots'),
+                id: 'ownerNotificationLanguage',
+                name: 'settings[ownerNotificationLanguage]',
+                value: settings.ownerNotificationLanguage,
+                options: languageOptions
+            }) }}
+        {% endif %}
+
+        <hr>
+
+        <h2>{{ 'settings.notifications.customerTitle'|t('slots') }}</h2>
+        <p class="light">{{ 'settings.notifications.customerDescription'|t('slots') }}</p>
+
+        {{ forms.textField({
+            label: 'settings.notifications.confirmationSubject'|t('slots'),
+            instructions: 'settings.notifications.confirmationSubjectInstructions'|t('slots'),
+            id: 'bookingConfirmationSubject',
+            name: 'settings[bookingConfirmationSubject]',
+            value: settings.bookingConfirmationSubject,
+            placeholder: 'settings.notifications.confirmationSubjectDefault'|t('slots')
+        }) }}
+
+        <hr>
+
+        {{ forms.lightswitchField({
+            label: 'settings.notifications.enableReminders'|t('slots'),
+            instructions: 'settings.notifications.enableRemindersInstructions'|t('slots'),
+            id: 'emailRemindersEnabled',
+            name: 'settings[emailRemindersEnabled]',
+            on: settings.emailRemindersEnabled,
+            toggle: '#reminder-settings'
+        }) }}
+
+        <div id="reminder-settings" class="{% if not settings.emailRemindersEnabled %}hidden{% endif %}">
+            {{ forms.textField({
+                label: 'settings.notifications.reminderSubject'|t('slots'),
+                instructions: 'settings.notifications.reminderSubjectInstructions'|t('slots'),
+                id: 'reminderEmailSubject',
+                name: 'settings[reminderEmailSubject]',
+                value: settings.reminderEmailSubject,
+                placeholder: 'settings.notifications.reminderSubjectDefault'|t('slots')
+            }) }}
+
+            {{ forms.textField({
+                label: 'settings.notifications.hoursBefore'|t('slots'),
+                instructions: 'settings.notifications.hoursBeforeInstructions'|t('slots'),
+                id: 'emailReminderHoursBefore',
+                name: 'settings[emailReminderHoursBefore]',
+                value: settings.emailReminderHoursBefore,
+                type: 'number',
+                min: 1,
+                max: 168
+            }) }}
+        </div>
+
+        <hr>
+
+        {{ forms.lightswitchField({
+            label: 'settings.notifications.enableCancellation'|t('slots'),
+            instructions: 'settings.notifications.enableCancellationInstructions'|t('slots'),
+            id: 'sendCancellationEmail',
+            name: 'settings[sendCancellationEmail]',
+            on: settings.sendCancellationEmail ?? true,
+            toggle: '#cancellation-settings'
+        }) }}
+
+        <div id="cancellation-settings" class="{% if not (settings.sendCancellationEmail ?? true) %}hidden{% endif %}">
+            {{ forms.textField({
+                label: 'settings.notifications.cancellationSubject'|t('slots'),
+                instructions: 'settings.notifications.cancellationSubjectInstructions'|t('slots'),
+                id: 'cancellationEmailSubject',
+                name: 'settings[cancellationEmailSubject]',
+                value: settings.cancellationEmailSubject,
+                placeholder: 'settings.notifications.cancellationSubjectDefault'|t('slots')
+            }) }}
+        </div>
+
+    </form>
+
+{% endblock %}

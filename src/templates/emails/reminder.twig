@@ -1,0 +1,93 @@
+{% extends 'slots/emails/_base' %}
+
+{% set title = 'emails.subject.reminder'|t('slots') %}
+{% set headerIcon = '🔔' %}
+{% set headerColor = '#000000' %}
+{% set preheader = 'emails.reminder.title'|t('slots', { date: formattedDateTime }) %}
+
+{% block header %}
+<div class="email-header">
+    <div style="
+        width: 64px;
+        height: 64px;
+        background: #000000;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+    ">
+        <svg viewBox="0 0 24 24" style="width: 32px; height: 32px; stroke: white; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none;">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+    </div>
+    <h1 class="header-title">{{ title }}</h1>
+    <p class="header-subtitle">{{ siteName }}</p>
+</div>
+{% endblock %}
+
+{% block content %}
+    <p style="font-size: 18px; font-weight: 800; margin-bottom: 12px;">
+        {{ 'emails.hello'|t('slots', { name: userName }) }}
+    </p>
+    <p>
+        {{ 'emails.reminder.message'|t('slots') }}
+    </p>
+
+    <div class="highlight-box">
+        <div class="highlight-primary">📅 {{ formattedDateTime }}</div>
+        {% if serviceName is defined and serviceName %}
+        <div class="highlight-secondary">{{ serviceName }}</div>
+        {% endif %}
+        {% if reservation is defined %}
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <div class="section-title">{{ 'labels.bookingDetails'|t('slots') }}</div>
+        <div class="info-grid">
+            <div class="info-row">
+                <span class="info-label">{{ 'emails.confirmation.bookingNumber'|t('slots') }}</span>
+                <span class="info-value"><span class="badge badge-primary">#{{ bookingId }}</span></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">{{ 'labels.date'|t('slots') }}</span>
+                <span class="info-value">{{ formattedBookingDate }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">{{ 'labels.time'|t('slots') }}</span>
+                <span class="info-value">{{ formattedStartTime }} – {{ formattedEndTime }}</span>
+            </div>
+            {% if employeeName is defined and employeeName %}
+            <div class="info-row">
+                <span class="info-label">{{ 'labels.staff'|t('slots') }}</span>
+                <span class="info-value">{{ employeeName }}</span>
+            </div>
+            {% endif %}
+            {% if locationName is defined and locationName %}
+            <div class="info-row">
+                <span class="info-label">{{ 'labels.location'|t('slots') }}</span>
+                <span class="info-value">{{ locationName }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if reservation is defined %}
+    {% endif %}
+
+
+    <div class="btn-container">
+        <a href="{{ managementUrl }}" class="btn btn-primary">{{ 'emails.common.manageBooking'|t('slots') }}</a>
+        <a href="{{ icsUrl }}" class="btn btn-secondary">{{ 'account.addToCalendar'|t('slots') }}</a>
+        {% if cancelUrl is defined and cancelUrl %}
+        <a href="{{ cancelUrl }}" class="btn btn-secondary">{{ 'account.cancelBooking'|t('slots') }}</a>
+        {% endif %}
+    </div>
+
+    <p style="font-size: 14px; color: #000000; text-align: center; margin-top: 32px; font-weight: 800;">
+        {{ 'emails.reminder.cancelInAdvance'|t('slots') }}
+    </p>
+{% endblock %}

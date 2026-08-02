@@ -1,0 +1,116 @@
+{#
+/**
+ * Booking Cancellation Confirmation Template
+ *
+ * Displays confirmation page before cancelling a booking
+ * Accessed via: /booking/cancel/{token} (GET request)
+ *
+ * Variables:
+ * - reservation: ReservationInterface
+ */
+#}
+
+{% extends "_layout" %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsAsset") %}
+
+{% set bodyClass = 'page-booking-cancel' %}
+
+{% set service = reservation.getService() %}
+{% set employee = reservation.getEmployee() %}
+{% set location = reservation.getLocation() %}
+
+{% block content %}
+<div class="slots-wizard">
+
+    {# Red warning band #}
+    <div class="slots-manage-bar slots-manage-bar--danger">
+        <span class="slots-manage-bar-label">{{ 'templates.cancelBooking'|t('slots') }}</span>
+    </div>
+
+    {# Warning hero #}
+    <div class="slots-manage-hero">
+        <div class="slots-manage-hero-icon slots-manage-hero-icon--danger">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+        </div>
+        <div class="slots-manage-datetime">{{ reservation.getFormattedDateTime() }}</div>
+        {% if service %}
+            <div class="slots-manage-service">{{ service.title }}</div>
+        {% endif %}
+        <p class="slots-manage-hero-sub">{{ 'templates.cancelBookingConfirmation'|t('slots') }}</p>
+    </div>
+
+    {# Content #}
+    <div class="slots-manage-body">
+
+        <div class="slots-manage-section slots-manage-reveal" style="animation-delay: 0.05s">
+            <div class="slots-manage-section-title">{{ 'templates.bookingDetails'|t('slots') }}</div>
+            <div class="slots-manage-grid">
+                {% if service %}
+                    <div class="slots-manage-row">
+                        <span class="slots-manage-label">{{ 'labels.service'|t('slots') }}</span>
+                        <span class="slots-manage-value">{{ service.title }}</span>
+                    </div>
+                {% endif %}
+                <div class="slots-manage-row">
+                    <span class="slots-manage-label">{{ 'templates.dateTime'|t('slots') }}</span>
+                    <span class="slots-manage-value">{{ reservation.getFormattedDateTime() }}</span>
+                </div>
+                {% if employee %}
+                    <div class="slots-manage-row">
+                        <span class="slots-manage-label">{{ 'labels.employee'|t('slots') }}</span>
+                        <span class="slots-manage-value">{{ employee.title }}</span>
+                    </div>
+                {% endif %}
+                {% if location %}
+                    <div class="slots-manage-row">
+                        <span class="slots-manage-label">{{ 'labels.location'|t('slots') }}</span>
+                        <span class="slots-manage-value">{{ location.title }}</span>
+                    </div>
+                {% endif %}
+                <div class="slots-manage-row">
+                    <span class="slots-manage-label">{{ 'templates.name'|t('slots') }}</span>
+                    <span class="slots-manage-value">{{ reservation.userName }}</span>
+                </div>
+                <div class="slots-manage-row">
+                    <span class="slots-manage-label">{{ 'templates.email'|t('slots') }}</span>
+                    <span class="slots-manage-value">{{ reservation.userEmail }}</span>
+                </div>
+            </div>
+        </div>
+
+        {# Cancel form #}
+        <form method="post">
+            {{ csrfInput() }}
+
+            <div class="slots-manage-section slots-manage-reveal" style="animation-delay: 0.1s">
+                <div class="slots-manage-section-title">{{ 'templates.cancellationReason'|t('slots') }}</div>
+                <textarea
+                    id="reason"
+                    name="reason"
+                    rows="3"
+                    placeholder="{{ 'templates.cancellationReasonPlaceholder'|t('slots') }}"
+                    class="slots-manage-textarea"
+                ></textarea>
+            </div>
+
+            <div class="slots-manage-actions slots-manage-reveal" style="animation-delay: 0.15s">
+                <a href="{{ reservation.getManagementUrl() }}" class="btn btn-primary">
+                    {{ 'templates.keepBooking'|t('slots') }}
+                </a>
+                <button type="submit" class="slots-btn-danger-outline">
+                    {{ 'templates.yesCancelBooking'|t('slots') }}
+                </button>
+            </div>
+        </form>
+
+        <p class="slots-manage-footnote">
+            {{ 'templates.cancellationEmailNotice'|t('slots') }}
+        </p>
+    </div>
+
+</div>
+{% endblock %}

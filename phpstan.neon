@@ -1,0 +1,54 @@
+parameters:
+    level: 5
+    paths:
+        - src
+    excludePaths:
+        - src/templates/*
+        - src/migrations/*
+        - src/web/*
+        - src/translations/*
+    tmpDir: .phpstan
+    treatPhpDocTypesAsCertain: false
+    bootstrapFiles:
+        - ../../vendor/autoload.php
+        - ../../vendor/craftcms/cms/bootstrap/console.php
+        - stubs/phpstan-bootstrap.php
+    ignoreErrors:        # Common patterns for Craft CMS plugins
+        - '#Cannot access offset .+ on mixed#'
+        - '#Cannot cast mixed to#'
+        # Controller return types - asJson() and renderTemplate() return craft\web\Response
+        - '#Method .+ should return craft\\web\\Response but returns yii\\web\\Response#'
+        # ActiveRecord find()->one() returns array|ActiveRecord — we know the concrete type
+        - '#Cannot access property \$\w+ on array\|yii\\db\\ActiveRecord#'
+        # Element::afterPopulate() and afterFind() are protected methods PHPStan may not resolve
+        - '#Call to an undefined static method craft\\base\\Element::(afterPopulate|afterFind)\(\)#'
+        # eagerLoadingMap() reads the relation column off each source element by a
+        # variable property name, so PHPStan only sees ElementInterface
+        - '#Access to an undefined property craft\\base\\ElementInterface::\$(userId|locationId|employeeId|serviceId)#'
+        # ElementQuery::one() returns array|ElementInterface, but we access concrete element properties
+        - '#Cannot access property \$\w+ on array\|craft\\base\\ElementInterface#'
+        - '#Cannot call method \w+\(\) on array\|craft\\base\\ElementInterface#'
+        # ReservationInterface property access — the Reservation element has public
+        # properties, but PHPStan can't resolve @property on interfaces with
+        # reportMagicProperties: true
+        - '#Access to an undefined property anvildev\\slots\\contracts\\ReservationInterface::\$\w+#'
+        # ActiveRecord find()->all() returns array<array|ActiveRecord>, concrete type known
+        - '#should return array<anvildev\\slots\\records\\\w+> but returns array<array\|yii\\db\\ActiveRecord>#'
+        # BookingVariable::services() returns ServiceQuery
+        - '#Method .+BookingVariable::services\(\) should return .+ServiceQuery but returns craft\\elements\\db\\ElementQuery#'
+        # yii2-redis is an optional dependency for MutexFactory
+        - '#Instantiated class yii\\redis\\Mutex not found#'
+        - '#Method .+MutexFactory::createRedisMutex\(\) should return yii\\mutex\\Mutex but returns yii\\redis\\Mutex#'
+        # Condition rules call custom query methods via ElementQueryInterface (Craft CMS pattern)
+        - '#Call to an undefined method craft\\elements\\db\\ElementQueryInterface::\w+\(\)#'
+        # BaseNumberConditionRule::queryParamValue() not resolved by PHPStan
+        - '#Call to an undefined method anvildev\\slots\\elements\\conditions\\Service\w+ConditionRule::queryParamValue\(\)#'
+
+    # Rules for stricter code
+    checkFunctionNameCase: true
+    reportMagicMethods: true
+    reportMagicProperties: true
+    checkExplicitMixed: true
+
+includes:
+    - ../../vendor/craftcms/phpstan/phpstan.neon

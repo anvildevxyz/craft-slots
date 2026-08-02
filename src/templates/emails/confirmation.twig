@@ -1,0 +1,142 @@
+{% extends 'slots/emails/_base' %}
+
+{% set title = 'emails.confirmation.title'|t('slots') %}
+{% set headerIcon = '✓' %}
+{% set headerColor = '#000000' %}
+{% set preheader = 'emails.confirmation.preheader'|t('slots', { date: formattedDateTime }) %}
+
+{% block header %}
+<div class="email-header">
+    <div style="
+        width: 64px;
+        height: 64px;
+        background: #000000;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+    ">
+        <svg viewBox="0 0 24 24" style="width: 36px; height: 36px; stroke: white; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; fill: none;">
+            <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+    </div>
+    <h1 class="header-title">{{ title }}</h1>
+    <p class="header-subtitle">{{ siteName }}</p>
+</div>
+{% endblock %}
+
+{% block content %}
+    <p style="font-size: 18px; font-weight: 800; margin-bottom: 12px;">
+        {{ 'emails.hello'|t('slots', { name: userName }) }}
+    </p>
+    <p>
+        {{ 'emails.confirmation.thankyou'|t('slots') }}
+    </p>
+
+    <div class="highlight-box success">
+        <div class="highlight-primary">📅 {{ formattedDateTime }}</div>
+        {% if serviceName is defined and serviceName %}
+        <div class="highlight-secondary">{{ serviceName }}</div>
+        {% endif %}
+        {% if variationName is defined and variationName %}
+        <div class="highlight-tertiary">{{ variationName }}</div>
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <div class="section-title">{{ 'labels.bookingDetails'|t('slots') }}</div>
+        <div class="info-grid">
+            <div class="info-row">
+                <span class="info-label">{{ 'emails.confirmation.bookingNumber'|t('slots') }}</span>
+                <span class="info-value"><span class="badge badge-primary">#{{ bookingId }}</span></span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">{{ 'labels.date'|t('slots') }}</span>
+                <span class="info-value">{{ formattedBookingDate }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">{{ 'labels.time'|t('slots') }}</span>
+                <span class="info-value">{{ formattedStartTime }} – {{ formattedEndTime }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">{{ 'labels.duration'|t('slots') }}</span>
+                <span class="info-value">{{ duration }} {{ 'labels.minutes'|t('slots') }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">{{ 'emails.confirmation.numberOfPeople'|t('slots') }}</span>
+                <span class="info-value">{{ quantity }}</span>
+            </div>
+            {% if employeeName is defined and employeeName %}
+            <div class="info-row">
+                <span class="info-label">{{ 'labels.staff'|t('slots') }}</span>
+                <span class="info-value">{{ employeeName }}</span>
+            </div>
+            {% endif %}
+            {% if locationName is defined and locationName %}
+            <div class="info-row">
+                <span class="info-label">{{ 'labels.location'|t('slots') }}</span>
+                <span class="info-value">{{ locationName }}</span>
+            </div>
+            {% endif %}
+            <div class="info-row">
+                <span class="info-label">{{ 'labels.status'|t('slots') }}</span>
+                <span class="info-value">{{ status }}</span>
+            </div>
+        </div>
+    </div>
+
+    {% if reservation is defined %}
+    {% endif %}
+
+    {% if notes is defined and notes %}
+    <div class="section">
+        <div class="section-title">{{ 'emails.confirmation.yourNotes'|t('slots') }}</div>
+        <div style="background-color: #ffffff; border: 2px solid #000000; padding: 20px; color: #000000; font-size: 14px; font-weight: 600;">
+            {{ notes }}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="section">
+        <div class="section-title">{{ 'emails.confirmation.contactDetails'|t('slots') }}</div>
+        <div class="info-grid">
+            <div class="info-row">
+                <span class="info-label">{{ 'labels.name'|t('slots') }}</span>
+                <span class="info-value">{{ userName }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">{{ 'labels.email'|t('slots') }}</span>
+                <span class="info-value">{{ userEmail }}</span>
+            </div>
+            {% if userPhone is defined and userPhone %}
+            <div class="info-row">
+                <span class="info-label">{{ 'labels.phone'|t('slots') }}</span>
+                <span class="info-value">{{ userPhone }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="btn-container">
+        <a href="{{ managementUrl }}" class="btn btn-primary">{{ 'emails.common.manageBooking'|t('slots') }}</a>
+        <a href="{{ icsUrl }}" class="btn btn-secondary">{{ 'account.addToCalendar'|t('slots') }}</a>
+        <a href="{{ cancelUrl }}" class="btn btn-secondary">{{ 'account.cancelBooking'|t('slots') }}</a>
+    </div>
+
+
+    <div class="notice-box">
+        <div class="notice-title">📋 {{ 'emails.confirmation.importantInfo'|t('slots') }}</div>
+        <ul>
+            <li>{{ 'emails.confirmation.keepEmail'|t('slots') }}</li>
+            <li>{{ 'emails.common.cancelInAdvance'|t('slots') }}</li>
+            <li>{{ 'emails.confirmation.makeChanges'|t('slots') }}</li>
+        </ul>
+    </div>
+{% endblock %}
+
+{% block footerMeta %}
+<div class="footer-meta">
+    {{ 'emails.confirmation.createdOn'|t('slots') }} {{ dateCreated }}<br>
+    {{ 'emails.confirmation.reference'|t('slots') }}: {{ confirmationToken }}
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsCpAsset") %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsSettingsAsset") %}
+
+{% set fullPageForm = true %}
+{% set selectedSubnavItem = 'settings' %}
+{% set selectedSettingsSubnavItem = 'booking' %}
+{% set title = 'settings.booking.title'|t('slots') %}
+
+{% block sidebar %}
+	{% include 'slots/settings/_sidebar' %}
+{% endblock %}
+
+{% block content %}
+	<form method="post" accept-charset="UTF-8" id="settings-form">
+		{{ csrfInput() }}
+		<input type="hidden" name="action" value="slots/cp/settings/save">
+		<input type="hidden" name="tab" value="booking">
+		{{ redirectInput('slots/settings/booking') }}
+
+		<h2 class="heading first">{{ 'settings.booking.title'|t('slots') }}</h2>
+		<p class="light">{{ 'settings.booking.description'|t('slots') }}</p>
+		<hr>
+		{{ forms.textField({
+            label: 'settings.booking.softLockDuration'|t('slots'),
+            instructions: 'settings.booking.softLockInstructions'|t('slots'),
+            id: 'softLockDurationMinutes',
+            name: 'settings[softLockDurationMinutes]',
+            value: settings.softLockDurationMinutes,
+            type: 'number',
+            min: 1
+        }) }}
+
+		{{ forms.textField({
+            label: 'settings.booking.defaultTimeSlotLength'|t('slots'),
+            instructions: 'settings.booking.defaultTimeSlotInstructions'|t('slots'),
+            id: 'defaultTimeSlotLength',
+            name: 'settings[defaultTimeSlotLength]',
+            value: settings.defaultTimeSlotLength,
+            type: 'number',
+            min: 5
+        }) }}
+
+		{{ forms.textField({
+            label: 'settings.notifications.bookingPageUrl'|t('slots'),
+            instructions: 'settings.notifications.bookingPageUrlInstructions'|t('slots'),
+            id: 'bookingPageUrl',
+            name: 'settings[bookingPageUrl]',
+            value: settings.bookingPageUrl,
+            type: 'url',
+            placeholder: 'https://yoursite.com/booking'
+        }) }}
+
+		<hr>
+		<h2>{{ 'settings.booking.advancedTitle'|t('slots') }}</h2>
+
+		{{ forms.selectField({
+            label: 'settings.booking.mutexDriver'|t('slots'),
+            instructions: 'settings.booking.mutexDriverInstructions'|t('slots'),
+            id: 'mutexDriver',
+            name: 'settings[mutexDriver]',
+            value: settings.mutexDriver ?? 'auto',
+            options: [
+                { label: 'Auto-detect (Recommended)'|t('slots'), value: 'auto' },
+                { label: 'File-based (single server)'|t('slots'), value: 'file' },
+                { label: 'Database (MySQL GET_LOCK)'|t('slots'), value: 'db' },
+                { label: 'Redis (requires yii2-redis)'|t('slots'), value: 'redis' },
+            ]
+        }) }}
+	</form>
+{% endblock %}

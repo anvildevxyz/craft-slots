@@ -1,0 +1,113 @@
+{% extends "_layouts/cp" %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsCpAsset") %}
+
+{% set title = customer.name ?: customer.email %}
+{% set selectedSubnavItem = 'customers' %}
+
+{% set crumbs = [
+    { label: 'titles.customers'|t('slots'), url: url('slots/customers') },
+] %}
+
+{% set statusColors = {
+    'pending': 'orange',
+    'confirmed': 'green',
+    'cancelled': '',
+    'no_show': 'red',
+} %}
+
+{% block content %}
+    <div class="slots-customer-summary">
+        <div class="meta read-only">
+            <div class="data">
+                <h5 class="heading">{{ 'labels.email'|t('slots') }}</h5>
+                <div class="value"><code>{{ customer.email }}</code></div>
+            </div>
+            {% if customer.phone %}
+                <div class="data">
+                    <h5 class="heading">{{ 'labels.phone'|t('slots') }}</h5>
+                    <div class="value">{{ customer.phone }}</div>
+                </div>
+            {% endif %}
+            <div class="data">
+                <h5 class="heading">{{ 'customers.account'|t('slots') }}</h5>
+                <div class="value">
+                    {%- if linkedUser -%}
+                        <a href="{{ linkedUser.cpEditUrl }}">{{ linkedUser.friendlyName ?: linkedUser.email }}</a>
+                    {%- else -%}
+                        <span class="light">{{ 'customers.noAccount'|t('slots') }}</span>
+                    {%- endif -%}
+                </div>
+            </div>
+            <div class="data">
+                <h5 class="heading">{{ 'customers.bookings'|t('slots') }}</h5>
+                <div class="value">{{ customer.totalBookings }}</div>
+            </div>
+            <div class="data">
+                <h5 class="heading">{{ 'customers.upcoming'|t('slots') }}</h5>
+                <div class="value">{{ customer.upcomingBookings }}</div>
+            </div>
+            <div class="data">
+                <h5 class="heading">{{ 'customers.cancelled'|t('slots') }}</h5>
+                <div class="value">{{ customer.cancelledBookings }}</div>
+            </div>
+            <div class="data">
+                <h5 class="heading">{{ 'customers.noShows'|t('slots') }}</h5>
+                <div class="value">{{ customer.noShowBookings }}</div>
+            </div>
+            <div class="data">
+                <h5 class="heading">{{ 'customers.firstBooking'|t('slots') }}</h5>
+                <div class="value">{{ customer.firstBooking ? customer.firstBooking|date('medium') : '—' }}</div>
+            </div>
+            <div class="data">
+                <h5 class="heading">{{ 'customers.totalPaid'|t('slots') }}</h5>
+                <div class="value">
+                    {%- if customer.paidMinorUnits -%}
+                        {{ (customer.paidMinorUnits / 100)|currency(customer.currency) }}
+                    {%- else -%}
+                        —
+                    {%- endif -%}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2>{{ 'customers.history'|t('slots') }}</h2>
+
+    {% if bookings|length %}
+        <div class="tableview">
+            <table class="data fullwidth">
+                <thead>
+                    <tr>
+                        <th>{{ 'labels.date'|t('slots') }}</th>
+                        <th>{{ 'labels.time'|t('slots') }}</th>
+                        <th>{{ 'labels.service'|t('slots') }}</th>
+                        <th>{{ 'labels.staff'|t('slots') }}</th>
+                        <th>{{ 'labels.status'|t('slots') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in bookings %}
+                        <tr>
+                            <td>
+                                <a href="{{ url('slots/bookings/' ~ booking.getId() ~ '/view') }}">
+                                    {{ booking.getBookingDate()|date('medium') }}
+                                </a>
+                            </td>
+                            <td>{{ booking.getStartTime() ? booking.getStartTime()|slice(0, 5) : '—' }}</td>
+                            <td>{{ booking.getService() ? booking.getService().title : '—' }}</td>
+                            <td>{{ booking.getEmployee() ? booking.getEmployee().title : '—' }}</td>
+                            <td>
+                                <span class="status {{ statusColors[booking.getStatus()] ?? '' }}"></span>
+                                {{ booking.getStatusLabel() }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="zilch">
+            <p>{{ 'customers.noBookings'|t('slots') }}</p>
+        </div>
+    {% endif %}
+{% endblock %}

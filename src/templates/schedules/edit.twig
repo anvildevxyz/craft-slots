@@ -1,0 +1,179 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsCpAsset") %}
+
+{% set selectedSubnavItem = 'schedules' %}
+{% set title = schedule.id ? 'schedule.edit'|t('slots') : 'schedule.new'|t('slots') %}
+
+{% set fullPageForm = true %}
+
+{% set days = {
+    1: 'labels.monday'|t('slots'),
+    2: 'labels.tuesday'|t('slots'),
+    3: 'labels.wednesday'|t('slots'),
+    4: 'labels.thursday'|t('slots'),
+    5: 'labels.friday'|t('slots'),
+    6: 'labels.saturday'|t('slots'),
+    7: 'labels.sunday'|t('slots')
+} %}
+
+{% block content %}
+    <input type="hidden" name="action" value="slots/cp/schedules/save">
+    {% if schedule.id %}
+        <input type="hidden" name="elementId" value="{{ schedule.id }}">
+    {% endif %}
+
+    <div id="fields">
+        <div class="field first">
+            {{ forms.lightswitchField({
+                label: 'Enabled'|t('app'),
+                id: 'enabled',
+                name: 'enabled',
+                on: schedule.enabled ?? true
+            }) }}
+        </div>
+
+        <div class="field">
+            {{ forms.textField({
+                label: 'Title'|t('app'),
+                id: 'title',
+                name: 'title',
+                value: schedule.title,
+                required: true,
+                autofocus: true,
+                errors: schedule.getErrors('title'),
+            }) }}
+        </div>
+
+        <div class="flex-fields">
+            <div class="field">
+                {{ forms.dateField({
+                    label: 'labels.startDate'|t('slots'),
+                    id: 'startDate',
+                    name: 'startDate',
+                    value: schedule.startDate,
+                    errors: schedule.getErrors('startDate'),
+                    instructions: 'schedule.startDateInstructions'|t('slots')
+                }) }}
+            </div>
+
+            <div class="field">
+                {{ forms.dateField({
+                    label: 'labels.endDate'|t('slots'),
+                    id: 'endDate',
+                    name: 'endDate',
+                    value: schedule.endDate,
+                    errors: schedule.getErrors('endDate'),
+                    instructions: 'schedule.endDateInstructions'|t('slots')
+                }) }}
+            </div>
+        </div>
+
+        <hr>
+
+        <h2>{{ 'schedule.workingHours'|t('slots') }}</h2>
+        <p class="light">{{ 'schedule.workingHoursInstructions'|t('slots') }}</p>
+
+        <div class="working-hours-editor" style="margin-top: 20px;">
+            <table class="editable" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th style="width: 20%;">{{ 'labels.day'|t('slots') }}</th>
+                        <th style="width: 8%;">{{ 'labels.enabled'|t('slots') }}</th>
+                        <th style="width: 15%;">{{ 'labels.start'|t('slots') }}</th>
+                        <th style="width: 15%;">{{ 'labels.end'|t('slots') }}</th>
+                        <th style="width: 12%;">{{ 'schedule.breakStart'|t('slots') }}</th>
+                        <th style="width: 12%;">{{ 'schedule.breakEnd'|t('slots') }}</th>
+                        <th style="width: 18%;">{{ 'labels.capacity'|t('slots') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dayNum, dayName in days %}
+                        {% set dayHours = schedule.workingHours[dayNum] ?? {
+                            enabled: (dayNum <= 5),
+                            start: '09:00',
+                            end: '17:00',
+                            breakStart: '12:00',
+                            breakEnd: '13:00',
+                            capacity: null
+                        } %}
+                        <tr>
+                            <td style="vertical-align: middle;">
+                                <strong>{{ dayName }}</strong>
+                            </td>
+                            <td style="vertical-align: middle;">
+                                {{ forms.lightswitch({
+                                    id: 'workingHours-' ~ dayNum ~ '-enabled',
+                                    name: 'workingHours[' ~ dayNum ~ '][enabled]',
+                                    on: dayHours.enabled ?? false,
+                                    small: true
+                                }) }}
+                            </td>
+                            <td>
+                                {{ forms.time({
+                                    id: 'workingHours-' ~ dayNum ~ '-start',
+                                    name: 'workingHours[' ~ dayNum ~ '][start]',
+                                    value: dayHours.start ?? '09:00'
+                                }) }}
+                            </td>
+                            <td>
+                                {{ forms.time({
+                                    id: 'workingHours-' ~ dayNum ~ '-end',
+                                    name: 'workingHours[' ~ dayNum ~ '][end]',
+                                    value: dayHours.end ?? '17:00'
+                                }) }}
+                            </td>
+                            <td>
+                                {{ forms.time({
+                                    id: 'workingHours-' ~ dayNum ~ '-breakStart',
+                                    name: 'workingHours[' ~ dayNum ~ '][breakStart]',
+                                    value: dayHours.breakStart ?? ''
+                                }) }}
+                            </td>
+                            <td>
+                                {{ forms.time({
+                                    id: 'workingHours-' ~ dayNum ~ '-breakEnd',
+                                    name: 'workingHours[' ~ dayNum ~ '][breakEnd]',
+                                    value: dayHours.breakEnd ?? ''
+                                }) }}
+                            </td>
+                            <td>
+                                {{ forms.text({
+                                    id: 'workingHours-' ~ dayNum ~ '-capacity',
+                                    name: 'workingHours[' ~ dayNum ~ '][capacity]',
+                                    value: dayHours.capacity ?? '',
+                                    type: 'number',
+                                    min: 1,
+                                    size: 5,
+                                    placeholder: '1'
+                                }) }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <ul class="light" style="margin-top: 8px;">
+                <li>{{ 'schedule.capacityInstructions'|t('slots') }}</li>
+                <li>{{ 'schedule.capacityPerService'|t('slots') }}</li>
+                <li>{{ 'schedule.capacityBuffers'|t('slots') }}</li>
+            </ul>
+        </div>
+
+        {% if schedule.id %}
+            <hr>
+            <h2>{{ 'schedule.assignedEmployees'|t('slots') }}</h2>
+            {% set assignedEmployees = schedule.getAssignedEmployees() %}
+            {% if assignedEmployees|length > 0 %}
+                <div class="chips" style="margin-top: 12px;">
+                    {% for employee in assignedEmployees %}
+                        <a href="{{ cpUrl('slots/employees/' ~ employee.id) }}" class="chip small">
+                            <span class="label">{{ employee.title }}</span>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="light">{{ 'schedule.notAssignedYet'|t('slots') }}</p>
+            {% endif %}
+        {% endif %}
+    </div>
+{% endblock %}

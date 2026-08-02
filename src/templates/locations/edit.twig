@@ -1,0 +1,108 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+
+{% set selectedSubnavItem = 'locations' %}
+{% set title = location.id ? 'location.edit'|t('slots') : 'location.new'|t('slots') %}
+
+{% set fullPageForm = true %}
+
+{% block content %}
+	<input type="hidden" name="action" value="slots/cp/locations/save">
+	{% if location.id %}
+		<input type="hidden" name="elementId" value="{{ location.id }}">
+	{% endif %}
+
+	<div id="fields">
+		<div class="field first">
+			{{ forms.lightswitchField({
+            label: 'Enabled'|t('app'),
+            id: 'enabled',
+            name: 'enabled',
+            on: location.enabled ?? true
+        }) }}
+		</div>
+
+		<div class="field">
+			{{ forms.textField({
+            label: 'Title'|t('app'),
+            id: 'title',
+            name: 'title',
+            value: location.title,
+            required: true,
+            autofocus: true,
+            errors: location.getErrors('title')
+        }) }}
+		</div>
+
+		<div class="field">
+			<div id="address-container">
+				{% namespace 'address' %}
+				{{ forms.selectField({
+                    label: "Country"|t('app'),
+                    id: 'countryCode',
+                    name: 'countryCode',
+                    options: craft.app.addresses.getCountryList(),
+                    value: location.countryCode ?? craft.app.config.general.defaultCountryCode,
+                    errors: location.getErrors('countryCode'),
+                    class: 'address-country-select'
+                }) }}
+
+				<div class="address-fields">
+					{{ forms.textField({
+                        label: "Address Line 1"|t('app'),
+                        id: 'addressLine1',
+                        name: 'addressLine1',
+                        value: location.addressLine1,
+                        errors: location.getErrors('addressLine1'),
+                        required: true
+                    }) }}
+
+					{{ forms.textField({
+                        label: "Address Line 2"|t('app'),
+                        id: 'addressLine2',
+                        name: 'addressLine2',
+                        value: location.addressLine2,
+                        errors: location.getErrors('addressLine2')
+                    }) }}
+
+					{{ forms.textField({
+                        label: "City"|t('app'),
+                        id: 'locality',
+                        name: 'locality',
+                        value: location.locality,
+                        errors: location.getErrors('locality'),
+                        required: true
+                    }) }}
+
+					{{ forms.textField({
+                        label: "State/Province"|t('app'),
+                        id: 'administrativeArea',
+                        name: 'administrativeArea',
+                        value: location.administrativeArea,
+                        errors: location.getErrors('administrativeArea')
+                    }) }}
+
+					{{ forms.textField({
+                        label: "Zip Code"|t('app'),
+                        id: 'postalCode',
+                        name: 'postalCode',
+                        value: location.postalCode,
+                        errors: location.getErrors('postalCode'),
+                        required: true
+                    }) }}
+				</div>
+				{% endnamespace %}
+			</div>
+
+			<div class="field">
+				{{ forms.timeZoneField({
+            label: 'labels.timezone'|t('slots'),
+            id: 'timezone',
+            name: 'timezone',
+            value: location.timezone ?? craft.app.timeZone,
+                errors: location.getErrors('timezone'),
+            }) }}
+			</div>
+		</div>
+	</div>
+{% endblock %}

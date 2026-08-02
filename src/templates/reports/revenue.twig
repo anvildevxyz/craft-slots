@@ -1,0 +1,105 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsCpAsset") %}
+
+{% set title = "reports.revenue.title"|t('slots') %}
+{% set selectedSubnavItem = 'reports' %}
+
+{% block actionButton %}
+    <a href="{{ url('slots/reports') }}" class="btn">← {{ "reports.backToReports"|t('slots') }}</a>
+{% endblock %}
+
+{% block content %}
+    <div class="slots-summary-card slots-mb-24">
+        <div class="slots-summary-label">{{ "reports.revenue.total"|t('slots') }}</div>
+        <div class="slots-summary-value">{{ totalRevenue|number_format(2) }} {{ currency }}</div>
+        {% if changePercent is not null %}
+            <div class="slots-mt-16">
+                <span class="slots-kpi-trend {{ changePercent > 0 ? 'trend-up' : (changePercent < 0 ? 'trend-down' : 'trend-neutral') }}">
+                    <span class="slots-kpi-trend-arrow">{{ changePercent > 0 ? '▲' : (changePercent < 0 ? '▼' : '–') }}</span>
+                    {{ changePercent|abs|number_format(1) }}% {{ "reports.revenue.vsPreviousPeriod"|t('slots') }}
+                </span>
+            </div>
+            {% if previousTotal is not null %}
+                <div class="slots-summary-date" style="opacity: 0.7; margin-top: 8px;">
+                    {{ "reports.revenue.previousPeriod"|t('slots') }}: {{ previousTotal|number_format(2) }} {{ currency }}
+                </div>
+            {% endif %}
+        {% endif %}
+        <div class="slots-summary-date">
+            {{ startDate|date('M d, Y') }} - {{ endDate|date('M d, Y') }}
+        </div>
+    </div>
+
+    <form method="get" class="slots-report-toolbar">
+        {{ forms.dateField({
+            label: "labels.startDate"|t('slots'),
+            name: "startDate",
+            value: startDate,
+        }) }}
+
+        {{ forms.dateField({
+            label: "labels.endDate"|t('slots'),
+            name: "endDate",
+            value: endDate,
+        }) }}
+
+        <button type="submit" class="btn submit">{{ "labels.filter"|t('slots') }}</button>
+
+        <div class="slots-toolbar-spacer"></div>
+
+        <div class="slots-report-actions">
+            <a href="{{ url('slots/reports/revenue', {startDate: startDate ?? '', endDate: endDate ?? '', format: 'csv'}) }}" class="btn">{{ "labels.downloadCsv"|t('slots') }}</a>
+        </div>
+    </form>
+
+    <div class="slots-widget-card" style="padding: 0;">
+        <div class="slots-widget-header" style="padding: 20px 20px 0;">
+            <h3 class="slots-widget-title">{{ "reports.revenue.title"|t('slots') }}</h3>
+        </div>
+        <div class="slots-table-wrapper" style="border: none; border-radius: 0;">
+        <table class="data fullwidth">
+            <thead>
+                <tr>
+                    <th>{{ "labels.date"|t('slots') }}</th>
+                    <th>{{ "labels.customer"|t('slots') }}</th>
+                    <th>{{ "labels.serviceOrEvent"|t('slots') }}</th>
+                    <th>{{ "labels.time"|t('slots') }}</th>
+                    <th>{{ "labels.revenue"|t('slots') }}</th>
+                    <th>{{ "labels.status"|t('slots') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if reservations|length > 0 %}
+                    {% for reservation in reservations %}
+                        <tr>
+                            <td>{{ reservation.bookingDate|date('M d, Y') }}</td>
+                            <td>{{ reservation.userEmail }}</td>
+                            <td>
+                                {% if reservation.service %}
+                                    {{ reservation.service.title }}
+                                {% else %}
+                                    {{ 'labels.na'|t('slots') }}
+                                {% endif %}
+                            </td>
+                            <td>{{ reservation.startTime }} - {{ reservation.endTime }}</td>
+                            <td class="slots-font-semibold">{{ reservation.totalPrice|number_format(2) }} {{ currency }}</td>
+                            <td>
+                                <span class="slots-status-badge status-{{ reservation.status }}">
+                                    {{ reservation.status|upper }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="slots-empty-state">
+                            {{ "reports.revenue.noResults"|t('slots') }}
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+{% endblock %}

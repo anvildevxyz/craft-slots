@@ -1,0 +1,18 @@
+{% set settingsSubnavItems = {
+    'booking': { label: 'element.booking'|t('slots'), url: url('slots/settings/booking') },
+    'payments': { label: 'settings.sidebar.payments'|t('slots'), url: url('slots/settings/payments') },
+    'security': { label: 'settings.sidebar.security'|t('slots'), url: url('slots/settings/security') },
+    'notifications': { label: 'settings.sidebar.emailNotifications'|t('slots'), url: url('slots/settings/notifications') },
+} %}
+
+<nav id="settings-nav">
+    <ul>
+        {% for key, item in settingsSubnavItems %}
+            <li>
+                <a href="{{ item.url }}" class="{% if key == selectedSettingsSubnavItem %}sel{% endif %}">
+                    {{ item.label }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+</nav>

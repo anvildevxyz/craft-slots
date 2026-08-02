@@ -1,0 +1,64 @@
+{#
+/**
+ * Account Portal Layout
+ * 
+ * Base layout for the customer account portal.
+ */
+#}
+
+{% extends "_layout" %}
+
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsAsset") %}
+
+{% set bodyClass = bodyClass is defined ? bodyClass : 'page-account' %}
+
+{% block content %}
+<main id="main" class="main-content" role="main" tabindex="0">
+    <div class="slots-wizard">
+
+        {% if craft.app.session.hasFlash('notice') %}
+            <div class="slots-flash">
+                <p>{{ craft.app.session.getFlash('notice') }}</p>
+            </div>
+        {% endif %}
+
+        {% if craft.app.session.hasFlash('error') %}
+            <div class="slots-flash flash-error">
+                <p>{{ craft.app.session.getFlash('error') }}</p>
+            </div>
+        {% endif %}
+
+        <nav class="slots-account-nav">
+            <ul>
+                <li>
+                    <a href="{{ url('slots/account') }}" class="{% if currentPage == 'dashboard' %}active{% endif %}">
+                        {{ 'account.dashboard'|t('slots') }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url('slots/account/upcoming') }}" class="{% if currentPage == 'upcoming' %}active{% endif %}">
+                        {{ 'account.upcoming'|t('slots') }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url('slots/account/past') }}" class="{% if currentPage == 'past' %}active{% endif %}">
+                        {{ 'account.past'|t('slots') }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ url('slots/account/bookings') }}" class="{% if currentPage == 'all' %}active{% endif %}">
+                        {{ 'account.allBookings'|t('slots') }}
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="slots-account-header">
+            <h3>{% block pageTitle %}{{ 'account.myAccount'|t('slots') }}{% endblock %}</h3>
+            <p>{{ 'Welcome, {name}'|t('slots', { name: user.friendlyName }) }}</p>
+        </div>
+
+        {% block accountContent %}{% endblock %}
+    </div>
+</main>
+{% endblock %}

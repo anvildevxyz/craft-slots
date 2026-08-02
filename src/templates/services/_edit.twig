@@ -1,0 +1,406 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsCpAsset") %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsServiceEditAsset") %}
+
+{% set selectedSubnavItem = 'services' %}
+{% set fullPageForm = true %}
+
+{% block actionButton %}
+	{% if craft.app.isMultiSite and service.id and (service.propagationMethod.value ?? 'none') != 'none' %}
+		{% set propagationMethod = service.propagationMethod.value ?? 'none' %}
+		{% set allSites = craft.app.sites.getAllSites() %}
+		{% set serviceSiteId = service.siteId ?? currentSite.id %}
+		{% set serviceSite = craft.app.sites.getSiteById(serviceSiteId) %}
+
+		{% set availableSites = [] %}
+		{% for siteItem in allSites %}
+			{% if propagationMethod == 'all' %}
+				{% set availableSites = availableSites|merge([siteItem]) %}
+			{% elseif propagationMethod == 'siteGroup' %}
+				{% if siteItem.groupId == serviceSite.groupId %}
+					{% set availableSites = availableSites|merge([siteItem]) %}
+				{% endif %}
+			{% elseif propagationMethod == 'language' %}
+				{% if siteItem.language == serviceSite.language %}
+					{% set availableSites = availableSites|merge([siteItem]) %}
+				{% endif %}
+			{% endif %}
+		{% endfor %}
+
+		{% if availableSites|length > 1 %}
+			<div class="site-selector">
+				<div class="btn menubtn" data-icon="world">{{ currentSite.name|t('site') }}</div>
+				<div class="menu">
+					<ul class="padded">
+						{% for siteItem in availableSites %}
+							<li>
+								<a href="{{ url('slots/services/' ~ service.id, {site: siteItem.handle}) }}" {% if siteItem.id == currentSite.id %} class="sel" {% endif %}>
+									{{ siteItem.name|t('site') }}
+								</a>
+							</li>
+						{% endfor %}
+					</ul>
+				</div>
+			</div>
+		{% endif %}
+	{% endif %}
+
+	<div class="btngroup">
+		<input type="submit" class="btn submit" value="{{ 'Save'|t('app') }}">
+	</div>
+{% endblock %}
+
+{% block content %}
+	<input type="hidden" name="action" value="slots/cp/services/save">
+	<input type="hidden" name="redirect" value="{{ 'slots/services'|hash }}">
+	<input type="hidden" name="siteId" value="{{ currentSite.id ?? service.siteId }}">
+	{% if service.id %}
+		<input type="hidden" name="id" value="{{ service.id }}">
+	{% endif %}
+
+	{% if craft.app.isMultiSite %}
+		{{ forms.selectField({
+            first: true,
+            label: 'multiSite.propagationMethod'|t('slots'),
+            instructions: 'multiSite.propagationInstructions'|t('slots'),
+            id: 'propagationMethod',
+            name: 'propagationMethod',
+            value: service.propagationMethod.value ?? 'none',
+            options: [
+                { label: 'multiSite.propagationNone'|t('slots'), value: 'none' },
+                { label: 'multiSite.propagationAll'|t('slots'), value: 'all' },
+                { label: 'multiSite.propagationSiteGroup'|t('slots'), value: 'siteGroup' },
+                { label: 'multiSite.propagationLanguage'|t('slots'), value: 'language' },
+            ],
+            errors: service.getErrors('propagationMethod')
+        }) }}
+		<hr>
+	{% endif %}
+
+	<div class="field {% if not craft.app.isMultiSite %}first{% endif %}">
+		{{ forms.lightswitchField({
+        label: 'Enabled'|t('app'),
+        id: 'enabled',
+        name: 'enabled',
+        on: service.enabled ?? true,
+    }) }}
+	</div>
+
+	<div class="field">
+		{{ forms.textField({
+        label: 'Title'|t('app'),
+        id: 'title',
+        name: 'title',
+        value: service.title,
+        required: true,
+        autofocus: true,
+        errors: service.getErrors('title')
+    }) }}
+	</div>
+
+	<div class="field">
+		{{ forms.textareaField({
+        label: 'labels.description'|t('slots'),
+        id: 'description',
+        name: 'description',
+        value: service.description,
+        rows: 3,
+        errors: service.getErrors('description')
+    }) }}
+	</div>
+
+	<div class="field">
+
+		{{ forms.textField({
+        label: 'service.durationMinutes'|t('slots'),
+        id: 'duration',
+        name: 'duration',
+        type: 'number',
+        required: true,
+        autofocus: true,
+        min: 1,
+        value: service.duration,
+        errors: service.getErrors('duration'),
+        unit: 'labels.min'|t('slots')
+    }) }}
+
+		{% set plugin = craft.app.plugins.getPlugin('slots') %}
+		{% set settings = plugin.getSettings() %}
+		{% set defaultTimeSlotLength = settings.defaultTimeSlotLength %}
+		{% set defaultText = defaultTimeSlotLength ? (defaultTimeSlotLength ~ ' ' ~ 'labels.min'|t('slots')) : ('service.serviceDurationFallback'|t('slots', { duration: service.duration ?? 'N/A' })) %}
+		{{ forms.selectField({
+        label: 'service.timeSlotLength'|t('slots'),
+        instructions: 'service.timeSlotInstructions'|t('slots', { default: defaultText }),
+        id: 'timeSlotLength',
+        name: 'timeSlotLength',
+        value: service.timeSlotLength,
+        options: [
+            { label: 'service.default'|t('slots'), value: '' },
+            { label: '5 min'|t('slots'), value: 5 },
+            { label: '10 min'|t('slots'), value: 10 },
+            { label: '15 min'|t('slots'), value: 15 },
+            { label: '20 min'|t('slots'), value: 20 },
+            { label: '30 min'|t('slots'), value: 30 },
+            { label: '45 min'|t('slots'), value: 45 },
+            { label: '60 min'|t('slots'), value: 60 },
+            { label: '90 min'|t('slots'), value: 90 },
+            { label: '120 min'|t('slots'), value: 120 },
+            { label: '180 min'|t('slots'), value: 180 },
+            { label: '240 min'|t('slots'), value: 240 },
+            { label: '300 min'|t('slots'), value: 300 },
+            { label: '360 min'|t('slots'), value: 360 },
+            { label: '420 min'|t('slots'), value: 420 },
+            { label: '480 min'|t('slots'), value: 480 },
+            { label: '540 min'|t('slots'), value: 540 },
+            { label: '600 min'|t('slots'), value: 600 },
+            { label: '720 min'|t('slots'), value: 720 },
+            { label: '840 min'|t('slots'), value: 840 },
+            { label: '960 min'|t('slots'), value: 960 },
+            { label: '1080 min'|t('slots'), value: 1080 },
+            { label: '1200 min'|t('slots'), value: 1200 },
+        ],
+        errors: service.getErrors('timeSlotLength')
+    }) }}
+	</div>
+
+	<div class="field">
+		{{ forms.textField({
+        label: 'labels.price'|t('slots'),
+        id: 'price',
+        name: 'price',
+        type: 'number',
+        step: '0.01',
+        min: 0,
+        value: service.price,
+        errors: service.getErrors('price'),
+    }) }}
+	</div>
+
+
+	<div class="field" id="buffer-fields">
+		{{ forms.textField({
+        label: 'service.bufferBefore'|t('slots'),
+        instructions: 'service.bufferBeforeInstructions'|t('slots'),
+        id: 'bufferBefore',
+        name: 'bufferBefore',
+        type: 'number',
+        min: 0,
+        value: service.bufferBefore,
+        errors: service.getErrors('bufferBefore'),
+        unit: 'labels.min'|t('slots')
+    }) }}
+
+		{{ forms.textField({
+        label: 'service.bufferAfter'|t('slots'),
+        instructions: 'service.bufferAfterInstructions'|t('slots'),
+        id: 'bufferAfter',
+        name: 'bufferAfter',
+        type: 'number',
+        min: 0,
+        value: service.bufferAfter,
+        errors: service.getErrors('bufferAfter'),
+        size: 10,
+        unit: 'labels.min'|t('slots')
+    }) }}
+	</div>
+
+	<hr>
+	<h2>{{ 'service.bookingRules'|t('slots') }}</h2>
+
+	<div class="field">
+		{{ forms.textField({
+        label: 'service.minTimeBeforeBooking'|t('slots'),
+        instructions: 'service.minTimeBeforeBookingInstructions'|t('slots'),
+        id: 'minTimeBeforeBooking',
+        name: 'minTimeBeforeBooking',
+        type: 'number',
+        min: 0,
+        value: service.minTimeBeforeBooking,
+        errors: service.getErrors('minTimeBeforeBooking'),
+        size: 10,
+        unit: 'labels.hoursUnit'|t('slots')
+    }) }}
+	</div>
+
+	{{ forms.lightswitchField({
+        label: 'service.allowCancellation'|t('slots'),
+        instructions: 'service.allowCancellationInstructions'|t('slots'),
+        id: 'allowCancellation',
+        name: 'allowCancellation',
+        on: service.allowCancellation,
+        errors: service.getErrors('allowCancellation'),
+        toggle: '#cancellation-policy-field',
+    }) }}
+
+	<div id="cancellation-policy-field" {{ not service.allowCancellation ? ' class="hidden"' : '' }}>
+		{{ forms.textField({
+        label: 'service.cancellationPolicyHours'|t('slots'),
+        instructions: 'service.cancellationPolicyHoursInstructions'|t('slots'),
+        id: 'cancellationPolicyHours',
+        name: 'cancellationPolicyHours',
+        type: 'number',
+        min: 0,
+        value: service.cancellationPolicyHours,
+        errors: service.getErrors('cancellationPolicyHours'),
+        size: 10,
+        unit: 'labels.hoursUnit'|t('slots'),
+        placeholder: settings.cancellationPolicyHours ?? 24
+    }) }}
+	</div>
+
+
+	{% set selectedLocations = [] %}
+	{% for locationId in assignedLocations %}
+		{% set location = craft.app.elements.getElementById(locationId, 'anvildev\\slots\\elements\\Location') %}
+		{% if location %}
+			{% set selectedLocations = selectedLocations|merge([location]) %}
+		{% endif %}
+	{% endfor %}
+
+	<hr>
+	<div class="field">
+		{{ forms.elementSelectField({
+			label: 'service.assignedLocations'|t('slots'),
+			id: 'locations',
+			name: 'locations',
+			elementType: 'anvildev\\slots\\elements\\Location',
+			elements: selectedLocations,
+			limit: null,
+			sources: '*',
+			instructions: 'service.locationsInstructions'|t('slots')
+		}) }}
+	</div>
+	<hr>
+	<h2>{{ 'service.availability'|t('slots') }}</h2>
+	{% set assignedSchedules = service.id ? service.getSchedules() : [] %}
+	<div class="field">
+		{{ forms.elementSelectField({
+			label: 'service.assignedSchedules'|t('slots'),
+			id: 'schedules',
+			name: 'schedules',
+			elementType: 'anvildev\\slots\\elements\\Schedule',
+			elements: assignedSchedules,
+			limit: null,
+			sortable: true,
+			sources: '*',
+			errors: service.getErrors('schedules'),
+		}) }}
+	</div>
+
+	<hr>
+	<h2>{{ 'service.customerBookingLimits'|t('slots') }}</h2>
+
+	<div class="field">
+		{{ forms.lightswitchField({
+        label: 'service.enableCustomerLimit'|t('slots'),
+        instructions: 'service.enableCustomerLimitInstructions'|t('slots'),
+        id: 'customerLimitEnabled',
+        name: 'customerLimitEnabled',
+        on: service.customerLimitEnabled ?? false,
+        toggle: '#customer-limit-settings'
+    }) }}
+	</div>
+
+	<div id="customer-limit-settings" class="{% if not service.customerLimitEnabled %}hidden{% endif %}">
+		<div class="field">
+			{{ forms.textField({
+            label: 'service.maxAppointments'|t('slots'),
+            instructions: 'service.maxAppointmentsInstructions'|t('slots'),
+            id: 'customerLimitCount',
+            name: 'customerLimitCount',
+            type: 'number',
+            min: 1,
+            value: service.customerLimitCount,
+            errors: service.getErrors('customerLimitCount')
+        }) }}
+		</div>
+
+		<div class="field">
+			{{ forms.selectField({
+            label: 'service.timePeriod'|t('slots'),
+            instructions: 'service.timePeriodInstructions'|t('slots'),
+            id: 'customerLimitPeriod',
+            name: 'customerLimitPeriod',
+            value: service.customerLimitPeriod ?? 'month',
+            options: [
+                { label: 'service.perDay'|t('slots'), value: 'day' },
+                { label: 'service.perWeek'|t('slots'), value: 'week' },
+                { label: 'service.perMonth'|t('slots'), value: 'month' },
+                { label: 'service.days7'|t('slots'), value: '7' },
+                { label: 'service.days14'|t('slots'), value: '14' },
+                { label: 'service.days30'|t('slots'), value: '30' },
+                { label: 'service.days90'|t('slots'), value: '90' },
+            ],
+            errors: service.getErrors('customerLimitPeriod')
+        }) }}
+		</div>
+
+		<div class="field">
+			{{ forms.selectField({
+            label: 'service.periodType'|t('slots'),
+            instructions: 'service.periodTypeInstructions'|t('slots'),
+            id: 'customerLimitPeriodType',
+            name: 'customerLimitPeriodType',
+            value: service.customerLimitPeriodType ?? 'rolling',
+            options: [
+                { label: 'service.rolling'|t('slots'), value: 'rolling' },
+                { label: 'service.fixed'|t('slots'), value: 'fixed' },
+            ],
+            errors: service.getErrors('customerLimitPeriodType')
+        }) }}
+		</div>
+	</div>
+
+	{% set settings = craft.app.plugins.getPlugin('slots').getSettings() %}
+
+	<hr>
+	<h2>{{ 'service.refundTiers'|t('slots') }}</h2>
+
+	{{ forms.lightswitchField({
+        label: 'service.allowRefund'|t('slots'),
+        instructions: 'service.allowRefundInstructions'|t('slots'),
+        id: 'allowRefund',
+        name: 'allowRefund',
+        on: service.allowRefund,
+        errors: service.getErrors('allowRefund'),
+        toggle: '#refund-tiers-settings',
+    }) }}
+
+	<div id="refund-tiers-settings" class="{% if not service.allowRefund %}hidden{% endif %}">
+		{% set refundTierData = service.refundTiers is iterable ? service.refundTiers : (service.refundTiers ? service.refundTiers|json_decode : null) %}
+		{% set refundTierRows = {} %}
+		{% if refundTierData %}
+			{% for tier in refundTierData %}
+				{% set refundTierRows = refundTierRows|merge({ ('row' ~ loop.index): tier }) %}
+			{% endfor %}
+		{% endif %}
+
+		{{ forms.editableTableField({
+			label: 'service.refundTiersLabel'|t('slots'),
+			instructions: 'service.refundTiersInstructions'|t('slots'),
+			id: 'refundTiers',
+			name: 'refundTiers',
+			cols: {
+				hoursBeforeStart: {
+					type: 'number',
+					heading: 'service.refundTiersHoursColumn'|t('slots'),
+					thin: false,
+				},
+				refundPercentage: {
+					type: 'number',
+					heading: 'service.refundTiersPercentColumn'|t('slots'),
+					thin: false,
+				},
+			},
+			rows: refundTierRows,
+			errors: service.getErrors('refundTiers'),
+			allowAdd: true,
+			allowDelete: true,
+			allowReorder: true,
+			addRowLabel: 'service.refundTiersAddRow'|t('slots'),
+		}) }}
+	</div>
+
+
+{% endblock %}

@@ -1,0 +1,63 @@
+{#
+/**
+ * Account Dashboard
+ * 
+ * Shows overview stats and upcoming bookings.
+ */
+#}
+
+{% extends "slots/frontend/account/_layout" %}
+
+{% set currentPage = 'dashboard' %}
+
+{% block pageTitle %}{{ 'account.myAccount'|t('slots') }}{% endblock %}
+
+{% block accountContent %}
+    <div class="slots-stats-grid">
+        <div class="slots-stat-card bg-light">
+            <p class="slots-stat-value">{{ stats.total }}</p>
+            <p class="slots-stat-label">{{ 'labels.totalBookings'|t('slots') }}</p>
+        </div>
+        <div class="slots-stat-card bg-green">
+            <p class="slots-stat-value">{{ stats.upcoming }}</p>
+            <p class="slots-stat-label">{{ 'account.upcoming'|t('slots') }}</p>
+        </div>
+        <div class="slots-stat-card bg-gray">
+            <p class="slots-stat-value">{{ stats.completed }}</p>
+            <p class="slots-stat-label">{{ 'status.completed'|t('slots') }}</p>
+        </div>
+        <div class="slots-stat-card bg-red">
+            <p class="slots-stat-value">{{ stats.cancelled }}</p>
+            <p class="slots-stat-label">{{ 'status.cancelled'|t('slots') }}</p>
+        </div>
+    </div>
+
+    <div class="slots-section">
+        <h4 class="slots-section-title">
+            {{ 'account.upcomingBookings'|t('slots') }}
+            {% if upcoming|length %}<span>({{ upcoming|length }})</span>{% endif %}
+        </h4>
+
+        {% if upcoming|length %}
+            {% for booking in upcoming %}
+                {% include 'slots/frontend/account/_booking-card' with { booking: booking } %}
+            {% endfor %}
+        {% else %}
+            <div class="slots-empty">
+                <p>{{ 'account.noUpcomingBookings'|t('slots') }}</p>
+            </div>
+        {% endif %}
+    </div>
+
+    {% if recent|length %}
+        <div class="slots-section section-plain">
+            <h4 class="slots-section-title-sm">
+                {{ 'labels.recentActivity'|t('slots') }}
+            </h4>
+
+            {% for booking in recent %}
+                {% include 'slots/frontend/account/_booking-card' with { booking: booking, compact: true } %}
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}

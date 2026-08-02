@@ -1,0 +1,139 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsCpAsset") %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsEmployeeEditAsset") %}
+
+{% set selectedSubnavItem = 'employees' %}
+{% set title = employee.id ? 'employee.edit'|t('slots') : 'employee.new'|t('slots') %}
+
+{% set fullPageForm = true %}
+
+{% set days = {
+    1: 'labels.monday'|t('slots'),
+    2: 'labels.tuesday'|t('slots'),
+    3: 'labels.wednesday'|t('slots'),
+    4: 'labels.thursday'|t('slots'),
+    5: 'labels.friday'|t('slots'),
+    6: 'labels.saturday'|t('slots'),
+    7: 'labels.sunday'|t('slots')
+} %}
+
+{% block content %}
+    <input type="hidden" name="action" value="slots/cp/employees/save">
+    {% if employee.id %}
+        <input type="hidden" name="elementId" value="{{ employee.id }}">
+    {% endif %}
+
+    <div id="fields">
+        <div class="field first">
+        {{ forms.lightswitchField({
+            label: 'Enabled'|t('app'),
+            id: 'enabled',
+            name: 'enabled',
+            on: employee.enabled ?? true
+        }) }}
+        </div>
+
+        <div class="field">
+        {{ forms.textField({
+            label: 'Title'|t('app'),
+            id: 'title',
+            name: 'title',
+            value: employee.title,
+            required: true,
+            autofocus: true,
+            errors: employee.getErrors('title')
+        }) }}
+        </div>
+
+        <div class="field">
+        {% set selectedUser = employee.userId ? craft.users.id(employee.userId).one() : null %}
+        {{ forms.elementSelectField({
+            label: 'labels.user'|t('slots'),
+            id: 'userId',
+            name: 'userId',
+            elementType: 'craft\\elements\\User',
+            elements: selectedUser ? [selectedUser] : [],
+            limit: 1,
+            viewMode: 'large',
+            errors: employee.getErrors('userId'),
+        }) }}
+        </div>
+
+        <div class="field">
+        {% set userEmail = selectedUser ? selectedUser.email : null %}
+        {{ forms.textField({
+            label: 'labels.email'|t('slots'),
+            instructions: userEmail
+                ? 'employee.emailInstructionsWithUser'|t('slots', { email: userEmail })
+                : 'employee.emailInstructionsNoUser'|t('slots'),
+            id: 'email',
+            name: 'email',
+            type: 'email',
+            value: employee.email,
+            errors: employee.getErrors('email'),
+        }) }}
+        </div>
+
+        <div class="field">
+        {{ forms.elementSelectField({
+            label: 'labels.location'|t('slots'),
+            id: 'locationId',
+            name: 'locationId',
+            elementType: 'anvildev\\slots\\elements\\Location',
+            elements: employee.locationId and employee.getLocation() ? [employee.getLocation()] : [],
+            limit: 1,
+            errors: employee.getErrors('locationId'),
+        }) }}
+        </div>
+
+        {% set assignedServices = [] %}
+        {% if employee.id %}
+            {% for serviceId in employee.getServiceIds() %}
+                {% set service = craft.app.elements.getElementById(serviceId, 'anvildev\\slots\\elements\\Service') %}
+                {% if service %}
+                    {% set assignedServices = assignedServices|merge([service]) %}
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+
+        <div class="field">
+            {{ forms.elementSelectField({
+                label: 'labels.services'|t('slots'),
+                id: 'services',
+                name: 'services',
+                elementType: 'anvildev\\slots\\elements\\Service',
+                elements: assignedServices,
+                limit: null,
+                sources: '*',
+                errors: employee.getErrors('services'),
+            }) }}
+        </div>
+
+        <hr>
+
+        <h2>{{ 'labels.schedules'|t('slots') }}</h2>
+        {% set assignedSchedules = employee.id ? employee.getSchedules() : [] %}
+        <div class="field">
+            {{ forms.elementSelectField({
+                label: 'employee.assignedSchedules'|t('slots'),
+                instructions: 'employee.assignedSchedulesInstructions'|t('slots'),
+                id: 'schedules',
+                name: 'schedules',
+                elementType: 'anvildev\\slots\\elements\\Schedule',
+                elements: assignedSchedules,
+                limit: null,
+                sortable: true,
+                sources: '*',
+                errors: employee.getErrors('schedules'),
+            }) }}
+        </div>
+
+    </div>
+{% endblock %}
+
+{% js %}
+window.SlotsConfig = window.SlotsConfig || {};
+window.SlotsConfig.assignedUserIds = {{ (assignedUserIds ?? [])|json_encode|raw }};
+{% endjs %}
+

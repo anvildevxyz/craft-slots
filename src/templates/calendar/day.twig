@@ -1,0 +1,82 @@
+{% extends "_layouts/cp" %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsCpAsset") %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsCalendarViewAsset") %}
+
+{% set selectedSubnavItem = 'calendar' %}
+{% set title = 'calendar.dayDate'|t('slots', { date: date|date('short') }) %}
+{% set currentView = 'day' %}
+
+{% set prevDay = date.format('Y-m-d')|date_modify('-1 day') %}
+{% set nextDay = date.format('Y-m-d')|date_modify('+1 day') %}
+
+{% block content %}
+    <div class="slots-calendar-layout">
+        <div>
+            {% include 'slots/calendar/_mini-calendar' with {
+                selectedDate: selectedDate,
+                view: currentView,
+                bookingCounts: bookingCounts
+            } %}
+        </div>
+
+        <div>
+            <div class="slots-calendar-header">
+                <div class="slots-calendar-nav">
+                    <div>
+                        <a href="{{ url('slots/calendar-view/day', { date: prevDay|date('Y-m-d') }) }}" class="btn">{{ 'calendar.previousDay'|t('slots') }}</a>
+                        <a href="{{ url('slots/calendar-view/day') }}" class="btn">{{ 'calendar.today'|t('slots') }}</a>
+                        <a href="{{ url('slots/calendar-view/day', { date: nextDay|date('Y-m-d') }) }}" class="btn">{{ 'calendar.nextDay'|t('slots') }}</a>
+                    </div>
+
+                    <div class="slots-view-switcher">
+                        <a href="{{ url('slots/calendar-view/month', { year: date|date('Y'), month: date|date('m') }) }}"
+                           class="btn{% if currentView == 'month' %} active{% endif %}">
+                            {{ 'calendar.month'|t('slots') }}
+                        </a>
+                        <a href="{{ url('slots/calendar-view/week', { date: date|date('Y-m-d') }) }}"
+                           class="btn{% if currentView == 'week' %} active{% endif %}">
+                            {{ 'calendar.week'|t('slots') }}
+                        </a>
+                        <a href="{{ url('slots/calendar-view/day', { date: date|date('Y-m-d') }) }}"
+                           class="btn{% if currentView == 'day' %} active{% endif %}">
+                            {{ 'calendar.day'|t('slots') }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="slots-day-schedule">
+                {% for hour, reservations in hourlySlots %}
+                    <div class="slots-day-hour-row">
+                        <div class="slots-day-hour-label">{{ hour }}</div>
+
+                        <div class="slots-day-hour-content">
+                            {% if reservations|length > 0 %}
+                                {% for reservation in reservations %}
+                                    <div class="slots-reservation-card status-{{ reservation.status }}">
+                                        <div class="slots-reservation-time">
+                                            {{ reservation.startTime }} - {{ reservation.endTime }}
+                                        </div>
+                                        <div class="slots-reservation-customer">
+                                            {{ 'calendar.customer'|t('slots', { name: reservation.customerEmail }) }}
+                                        </div>
+                                        {% if reservation.serviceId %}
+                                            <div class="slots-reservation-service">
+                                                {{ 'calendar.serviceId'|t('slots', { id: reservation.serviceId }) }}
+                                            </div>
+                                        {% endif %}
+                                        <div class="slots-reservation-actions">
+                                            <a href="{{ url('slots/bookings/' ~ reservation.id) }}" class="btn small">{{ 'calendar.viewDetails'|t('slots') }}</a>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="slots-day-available">{{ 'calendar.available'|t('slots') }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

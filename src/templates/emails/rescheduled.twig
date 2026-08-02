@@ -1,0 +1,87 @@
+{% extends 'slots/emails/_base' %}
+
+{% set title = 'emails.rescheduled.title'|t('slots') %}
+{% set headerIcon = '⟳' %}
+{% set headerColor = '#000000' %}
+{% set preheader = 'emails.rescheduled.preheader'|t('slots', { dateTime: formattedDateTime }) %}
+
+{% block header %}
+	<div class="email-header">
+		<div style="
+				        display: inline-block;
+				        background-color: #000000;
+				        color: white;
+				        padding: 12px 24px;
+				        font-weight: 900;
+				        font-size: 12px;
+				        text-transform: uppercase;
+				        letter-spacing: 0.1em;
+				        margin-bottom: 16px;
+				    ">
+			⟳
+			{{ 'emails.rescheduled.badge'|t('slots') }}
+		</div>
+		<h1 class="header-title">{{ title }}</h1>
+		<p class="header-subtitle">{{ siteName }}</p>
+	</div>
+{% endblock %}
+
+{% block content %}
+	<p style="font-size: 18px; font-weight: 800; margin-bottom: 12px;">
+		{{ 'emails.hello'|t('slots', { name: userName }) }}
+	</p>
+	<p>
+		{{ 'emails.rescheduled.intro'|t('slots') }}
+	</p>
+
+	<div class="highlight-box">
+		<div class="highlight-primary">📅
+			{{ formattedDateTime }}
+		</div>
+		{% if serviceName is defined and serviceName %}
+			<div class="highlight-secondary">{{ serviceName }}</div>
+		{% endif %}
+		<div style="margin-top: 16px;">
+			<span class="badge badge-primary">{{ 'element.booking'|t('slots') }}
+				#{{ bookingId }}</span>
+		</div>
+	</div>
+
+	<div class="section">
+		<div class="section-title">{{ 'emails.rescheduled.details'|t('slots') }}</div>
+		<div class="info-grid">
+			{% if previousDate is defined and previousDate %}
+				<div class="info-row">
+					<span class="info-label">{{ 'emails.rescheduled.previousTime'|t('slots') }}</span>
+					<span class="info-value" style="text-decoration: line-through;">
+						{{ previousDate }}{% if previousStartTime is defined and previousStartTime %}
+							{{ previousStartTime }}
+						{% endif %}
+					</span>
+				</div>
+			{% endif %}
+			<div class="info-row">
+				<span class="info-label">{{ 'emails.rescheduled.newTime'|t('slots') }}</span>
+				<span class="info-value" style="font-weight: 900;">{{ formattedDateTime }}</span>
+			</div>
+			{% if employeeName is defined and employeeName %}
+				<div class="info-row">
+					<span class="info-label">{{ 'labels.staff'|t('slots') }}</span>
+					<span class="info-value">{{ employeeName }}</span>
+				</div>
+			{% endif %}
+			{% if locationName is defined and locationName %}
+				<div class="info-row">
+					<span class="info-label">{{ 'labels.location'|t('slots') }}</span>
+					<span class="info-value">{{ locationName }}</span>
+				</div>
+			{% endif %}
+		</div>
+	</div>
+
+	{% if managementUrl is defined and managementUrl %}
+		<div class="btn-container">
+			<a href="{{ managementUrl }}" class="btn btn-primary">{{ 'emails.common.manageBooking'|t('slots') }}</a>
+		</div>
+	{% endif %}
+{% endblock %}
