@@ -70,10 +70,11 @@ check('a service saves on the primary site', Service::find()->siteId($primary->i
 if ($secondary) {
     // propagationMethod defaults to None, so a service belongs to the site it was
     // created on until an author says otherwise. Both halves of that matter.
+    $leaked = Service::find()->siteId($secondary->id)->id($svc->id)->one();
     check(
         "with propagation None it stays off '{$secondary->handle}'",
-        Service::find()->siteId($secondary->id)->id($svc->id)->one() === null,
-        'it propagated anyway',
+        $leaked === null,
+        "copy on '{$secondary->handle}': " . ($leaked === null ? 'none' : "id={$leaked->id}"),
     );
 
     $svc->propagationMethod = \craft\enums\PropagationMethod::All;
@@ -183,12 +184,35 @@ Slots::getInstance()->getSettings()->maximumAdvanceBookingDays = 10;
 $beyond = (new DateTime('+40 days'))->format('Y-m-d');
 $beyondSlots = $availability->getAvailableSlots($beyond, null, null, $svc->id, 1);
 check('maximumAdvanceBookingDays=10 blocks a date 40 days out', $beyondSlots === [], count($beyondSlots) . ' slots offered');
+
+// Positive control. Without it an empty result proves nothing: a change that
+// returned no slots for *any* date would satisfy the check above.
+$inside = (new DateTime('+3 days'))->format('Y-m-d');
+$insideSlots = $availability->getAvailableSlots($inside, null, null, $svc->id, 1);
+check('…while a date inside the window still offers slots', $insideSlots !== [], count($insideSlots) . ' slots offered');
+
+// And the ceiling has to hold on the path that actually accepts a booking, not
+// just the one that draws the calendar — a direct POST never asks for the slot
+// list. isSlotAvailable() is what booking creation consults.
+$beyondBookable = $availability->isSlotAvailable($beyond, '09:00', '10:00', null, null, $svc->id, 1);
+check('…and a direct booking beyond the window is refused', !$beyondBookable, $beyondBookable ? 'ACCEPTED — the ceiling is front-end only' : 'refused');
 Craft::$app->getDb()->createCommand()
     ->update('{{%slots_settings}}', ['maximumAdvanceBookingDays' => $originalMax])->execute();
 // Settings are memoized per request, so the in-memory copy has to go back too —
 // otherwise every later check runs against a 10-day booking window.
 Slots::getInstance()->getSettings()->maximumAdvanceBookingDays = $originalMax;
 $availability->clearSlotCache();
+
+// Sensitivity control for the two checks above: with the ceiling lifted, the
+// same date and slot must become bookable again. Otherwise a refusal caused by
+// something else entirely — no schedule that far out, say — would read as the
+// ceiling doing its job.
+$beyondAfterReset = $availability->isSlotAvailable($beyond, '09:00', '10:00', null, null, $svc->id, 1);
+check(
+    '…and bookable again once the ceiling is lifted',
+    $beyondAfterReset,
+    $beyondAfterReset ? 'accepted' : "still refused with max={$originalMax} — the checks above prove nothing",
+);
 
 // ========================================================== 3. capacity
 echo "\nCapacity at the boundary\n";
@@ -228,8 +252,10 @@ foreach ($afterSlots as $s) {
     }
 }
 check('two seats taken leaves one', ($sameSlot['availableCapacity'] ?? null) === 1, 'availableCapacity=' . var_export($sameSlot['availableCapacity'] ?? null, true));
-check('the last seat is still bookable', $availability->isSlotAvailable($capDate, '09:00', '10:00', null, null, $svc->id, 1), 'quantity 1 refused');
-check('one seat more than remains is refused', !$availability->isSlotAvailable($capDate, '09:00', '10:00', null, null, $svc->id, 2), 'quantity 2 allowed with 1 seat left');
+$lastSeat = $availability->isSlotAvailable($capDate, '09:00', '10:00', null, null, $svc->id, 1);
+check('the last seat is still bookable', $lastSeat, 'quantity 1 ' . ($lastSeat ? 'allowed' : 'refused'));
+$oneTooMany = $availability->isSlotAvailable($capDate, '09:00', '10:00', null, null, $svc->id, 2);
+check('one seat more than remains is refused', !$oneTooMany, 'quantity 2 ' . ($oneTooMany ? 'allowed' : 'refused') . ' with 1 seat left');
 
 // ========================================================== teardown
 foreach (array_reverse($made) as $el) {

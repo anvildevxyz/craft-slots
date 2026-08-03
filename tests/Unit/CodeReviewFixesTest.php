@@ -102,11 +102,7 @@ class CodeReviewFixesTest extends TestCase
 
     public function testUpdateReservationUsesMutex(): void
     {
-        $source = $this->readSource('services/BookingService.php');
-        // Extract updateReservation method — use a broader match that captures the full method
-        $pos = strpos($source, 'function updateReservation');
-        $this->assertNotFalse($pos, 'updateReservation method should exist');
-        $methodBody = substr($source, $pos, 2000);
+        $methodBody = $this->sourceOfMethod(\anvildev\slots\services\BookingService::class, 'updateReservation');
 
         $this->assertStringContainsString(
             'mutex',
@@ -122,9 +118,7 @@ class CodeReviewFixesTest extends TestCase
 
     public function testUpdateReservationUsesTransaction(): void
     {
-        $source = $this->readSource('services/BookingService.php');
-        $pos = strpos($source, 'function updateReservation');
-        $methodBody = substr($source, $pos, 2000);
+        $methodBody = $this->sourceOfMethod(\anvildev\slots\services\BookingService::class, 'updateReservation');
 
         $this->assertStringContainsString(
             'beginTransaction',
@@ -371,10 +365,7 @@ class CodeReviewFixesTest extends TestCase
 
     public function testSettingsRecordNullsOnDecryptionFailure(): void
     {
-        $source = $this->readSource('records/SettingsRecord.php');
-        $pos = strpos($source, 'function afterFind');
-        $this->assertNotFalse($pos);
-        $methodBody = substr($source, $pos, 1500);
+        $methodBody = $this->sourceOfMethod(\anvildev\slots\records\SettingsRecord::class, 'afterFind');
         $this->assertStringContainsString('= null', $methodBody,
             'afterFind must set field to null on decryption failure to prevent double-encryption');
     }
