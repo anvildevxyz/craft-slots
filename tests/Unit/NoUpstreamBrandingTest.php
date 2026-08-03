@@ -39,7 +39,6 @@ class NoUpstreamBrandingTest extends TestCase
         'SYNC.md',
         'CHANGELOG.md',
         'README.md',
-        'docs/SCOPE.md',
         'tests/Unit/ImportContractTest.php',
         'tests/Unit/ControlPanelWiringTest.php',
         'tests/Unit/NoUpstreamBrandingTest.php',

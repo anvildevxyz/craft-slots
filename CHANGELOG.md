@@ -7,8 +7,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## 1.0.0 - 2026-08-02
 
-First release. See [docs/SCOPE.md](docs/SCOPE.md) for the feature contract that defines what this plugin
-does and, just as deliberately, what it does not.
+First release. See the [README](README.md) for what this plugin does, and
+[CONFIGURATION.md](CONFIGURATION.md) for how to set it up.
 
 ### Added
 - Appointment booking across services, staff and locations, with availability built from recurring

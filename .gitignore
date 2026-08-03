@@ -31,3 +31,6 @@ coverage/
 test-results/
 playwright-report/
 /node_modules/@playwright/
+
+# Runtime logs must never be committed.
+storage/logs/
