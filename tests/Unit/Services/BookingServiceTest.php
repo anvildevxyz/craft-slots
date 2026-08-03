@@ -429,12 +429,7 @@ class BookingServiceTest extends TestCase
 
     public function testExecuteCancellationUsesTransaction(): void
     {
-        $source = file_get_contents(
-            dirname(__DIR__, 3) . '/src/services/BookingService.php'
-        );
-        $methodStart = strpos($source, 'function executeCancellation');
-        $this->assertNotFalse($methodStart);
-        $methodSource = substr($source, $methodStart, 2000);
+        $methodSource = $this->sourceOfMethod(\anvildev\slots\services\BookingService::class, 'executeCancellation');
         $this->assertStringContainsString('beginTransaction()', $methodSource,
             'executeCancellation must use a database transaction');
     }

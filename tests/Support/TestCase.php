@@ -28,6 +28,37 @@ abstract class TestCase extends BaseTestCase
     }
 
     /**
+     * The exact source of one method, bounded by its real start and end lines.
+     *
+     * Contract tests that assert on source text used to take a fixed slice —
+     * `substr($source, $pos, 2000)`. A slice long enough to cover the method
+     * today stops covering it the moment the method grows, and the assertion
+     * then fails reporting a broken contract that is not broken. That happened
+     * for real: adding the booking-window ceiling to filterPastSlots() pushed
+     * the asserted expression past the 2000th character.
+     *
+     * Reflection has no such cliff, and several suites here already used it
+     * privately; this is that approach shared rather than a new one.
+     *
+     * @param class-string $class
+     */
+    protected function sourceOfMethod(string $class, string $method): string
+    {
+        $reflection = new \ReflectionMethod($class, $method);
+        $file = $reflection->getFileName();
+        $this->assertNotFalse($file, "{$class} has no source file");
+
+        $lines = file($file);
+        $this->assertNotFalse($lines, "Could not read {$file}");
+
+        return implode('', array_slice(
+            $lines,
+            $reflection->getStartLine() - 1,
+            $reflection->getEndLine() - $reflection->getStartLine() + 1,
+        ));
+    }
+
+    /**
      * Tear down after each test
      */
     protected function tearDown(): void

@@ -8,10 +8,7 @@ class DashboardRevenueTest extends TestCase
 {
     public function testRevenueMetricsDoNotLoadAllReservations(): void
     {
-        $source = file_get_contents(dirname(__DIR__, 3) . '/src/services/DashboardService.php');
-        $pos = strpos($source, 'function calculateRevenueMetrics');
-        $this->assertNotFalse($pos);
-        $methodBody = substr($source, $pos, 2000);
+        $methodBody = $this->sourceOfMethod(\anvildev\slots\services\DashboardService::class, 'calculateRevenueMetrics');
 
         // Should NOT load all confirmed reservations via ->all()
         $this->assertStringNotContainsString(

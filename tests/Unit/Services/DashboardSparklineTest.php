@@ -8,10 +8,7 @@ class DashboardSparklineTest extends TestCase
 {
     public function testSparklineUsesGroupByInsteadOfLoop(): void
     {
-        $source = file_get_contents(dirname(__DIR__, 3) . '/src/services/DashboardService.php');
-        $pos = strpos($source, 'function getSparklineData');
-        $this->assertNotFalse($pos);
-        $methodBody = substr($source, $pos, 1500);
+        $methodBody = $this->sourceOfMethod(\anvildev\slots\services\DashboardService::class, 'getSparklineData');
 
         // Should NOT have a for loop doing individual queries per day
         $this->assertStringNotContainsString(
