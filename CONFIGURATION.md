@@ -157,6 +157,21 @@ These token-based URLs are included in confirmation emails and require no authen
 
 The ICS endpoint returns a `text/calendar` response with a `Content-Disposition: attachment` header, triggering a download in all browsers and email clients.
 
+### Content-Security-Policy
+
+The manage page carries no inline JavaScript. Its quantity and reschedule
+controls are served as a normal script file, and the values they need arrive in
+a `<script type="application/json">` data block — inert markup a CSP never
+executes. So the page works under a strict policy such as:
+
+```
+default-src 'self'; script-src 'self'
+```
+
+with no `unsafe-inline` and no per-request nonce. The same holds for the booking
+wizard. If your site's own layout wraps these pages, its markup still has to
+satisfy your policy — only the plugin's own output is covered here.
+
 ---
 
 ## Booking Wizard Behavior
