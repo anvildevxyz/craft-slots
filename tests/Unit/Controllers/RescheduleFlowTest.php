@@ -141,9 +141,38 @@ class RescheduleFlowTest extends TestCase
      */
     public function testTemplatePostsManageTokenRatherThanToken(): void
     {
+        // The behaviour moved out of the template into its own script so the
+        // page survives a strict CSP; the constraint it encodes did not move.
+        $script = file_get_contents(dirname(__DIR__, 3) . '/src/web/js/frontend/manage-page.js');
+
+        // Only the reschedule calls are subject to this: the quantity endpoints
+        // take the reservation id plus a `token` body param and always have.
+        $reschedule = substr($script, (int) strpos($script, '── Reschedule'));
+
+        $this->assertStringContainsString("params.append('manageToken', config.token)", $reschedule);
+        $this->assertStringNotContainsString("params.append('token', config.token)", $reschedule);
+    }
+
+    /**
+     * The same page is reached straight from an email link, so it has to work
+     * under a strict Content-Security-Policy. That holds only while the template
+     * ships no executable inline script: a `<script>` with no type (or a JS one)
+     * needs 'unsafe-inline', whereas the JSON config block is inert.
+     */
+    public function testManageTemplateShipsNoExecutableInlineScript(): void
+    {
         $template = file_get_contents(dirname(__DIR__, 3) . '/src/templates/manage-booking.twig');
 
-        $this->assertStringContainsString("params.append('manageToken', manageToken)", $template);
-        $this->assertStringNotContainsString("params.append('token', manageToken)", $template);
+        preg_match_all('/<script\b([^>]*)>/i', $template, $matches);
+
+        foreach ($matches[1] as $attributes) {
+            $this->assertMatchesRegularExpression(
+                '/type\s*=\s*"application\/json"/i',
+                $attributes,
+                'Inline <script> on the manage page must be an inert JSON data block, not executable JavaScript',
+            );
+        }
+
+        $this->assertStringContainsString('SlotsManagePageAsset', $template, 'The behaviour must be delivered as an asset bundle');
     }
 }

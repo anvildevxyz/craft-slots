@@ -185,8 +185,8 @@
         {% endif %}
 
         {# Everything the quantity and reschedule controls need, handed over as
-           data rather than as generated code. A <script> with a non-JS type is
-           never executed, so a strict CSP leaves it alone — which is the whole
+           data rather than as generated code. A script element with a non-JS
+           type is never executed, so a strict CSP leaves it alone — which is the whole
            point: this page is reached from an email link and used to be the one
            front-end surface that needed 'unsafe-inline' to work.
 
