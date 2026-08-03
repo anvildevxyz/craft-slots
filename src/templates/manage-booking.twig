@@ -16,6 +16,7 @@
    page renders on a site that ships no `_layout`. #}
 {% extends craft.app.view.doesTemplateExist('_layout') ? '_layout' : 'slots/_fallback-layout' %}
 {% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsAsset") %}
+{% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsManagePageAsset") %}
 
 {% set bodyClass = 'page-booking-management' %}
 
@@ -154,69 +155,6 @@
                     </button>
                 </div>
                 <p class="slots-quantity-error" id="slots-quantity-error"></p>
-                <script>
-                (function() {
-                    var currentQty = {{ reservation.getQuantity() }};
-                    var reservationId = {{ reservation.getId() }};
-                    var token = '{{ reservation.getConfirmationToken()|e('js') }}';
-                    var csrfName = '{{ craft.app.config.general.csrfTokenName }}';
-                    var csrfToken = '{{ craft.app.request.csrfToken }}';
-                    var redirectUrl = '{{ reservation.getManagementUrl()|e('js') }}';
-
-                    var input = document.getElementById('slots-new-quantity');
-                    var submitBtn = document.getElementById('slots-quantity-submit');
-                    var errorEl = document.getElementById('slots-quantity-error');
-
-                    function showError(msg) {
-                        errorEl.textContent = msg;
-                        errorEl.style.display = msg ? 'block' : 'none';
-                    }
-
-                    input.addEventListener('input', function() {
-                        showError('');
-                        var newQty = parseInt(input.value, 10);
-                        submitBtn.disabled = isNaN(newQty) || newQty < 1 || newQty === currentQty;
-                    });
-
-                    submitBtn.addEventListener('click', function() {
-                        var newQty = parseInt(input.value, 10);
-                        if (isNaN(newQty) || newQty < 1 || newQty === currentQty) return;
-
-                        showError('');
-                        submitBtn.disabled = true;
-
-                        var isReduce = newQty < currentQty;
-                        var action = isReduce
-                            ? '/actions/slots/booking-management/reduce-quantity'
-                            : '/actions/slots/booking-management/increase-quantity';
-
-                        var params = new URLSearchParams();
-                        params.append(csrfName, csrfToken);
-                        params.append('id', reservationId);
-                        params.append('token', token);
-                        params.append(isReduce ? 'reduceBy' : 'increaseBy', Math.abs(newQty - currentQty));
-
-                        fetch(action, {
-                            method: 'POST',
-                            headers: { 'Accept': 'application/json' },
-                            body: params,
-                        })
-                        .then(function(r) { return r.json(); })
-                        .then(function(data) {
-                            if (data.success) {
-                                window.location.href = redirectUrl;
-                            } else {
-                                showError(data.message || data.error || '{{ 'templates.quantityUpdateFailed'|t('slots')|e('js') }}');
-                                submitBtn.disabled = false;
-                            }
-                        })
-                        .catch(function() {
-                            showError('{{ 'templates.quantityUpdateFailed'|t('slots')|e('js') }}');
-                            submitBtn.disabled = false;
-                        });
-                    });
-                })();
-                </script>
             </div>
         {% endif %}
 
@@ -243,173 +181,48 @@
 
                 <p class="slots-quantity-error" id="slots-reschedule-error"></p>
 
-                <script>
-                (function() {
-                    var manageToken = '{{ reservation.getConfirmationToken()|e('js') }}';
-                    var csrfName = '{{ craft.app.config.general.csrfTokenName }}';
-                    var csrfToken = '{{ craft.app.request.csrfToken }}';
-                    var redirectUrl = '{{ reservation.getManagementUrl()|e('js') }}';
-                    var quantity = {{ reservation.getQuantity() }};
-                    var employeeId = {{ reservation.getEmployeeId() ?? 'null' }};
-                    var locationId = {{ reservation.getLocationId() ?? 'null' }};
-                    var serviceId = {{ reservation.getServiceId() ?? 'null' }};
-                    var currentDate = '{{ reservation.getBookingDate()|e('js') }}';
-                    var currentStart = '{{ reservation.getStartTime()|e('js') }}';
-
-                    var labels = {
-                        loading: {{ 'templates.rescheduleLoading'|t('slots')|json_encode|raw }},
-                        none: {{ 'templates.rescheduleNoSlots'|t('slots')|json_encode|raw }},
-                        failed: {{ 'templates.rescheduleFailed'|t('slots')|json_encode|raw }},
-                        current: {{ 'templates.rescheduleCurrentSlot'|t('slots')|json_encode|raw }}
-                    };
-
-                    var dateInput = document.getElementById('slots-reschedule-date');
-                    var slotsEl = document.getElementById('slots-reschedule-slots');
-                    var submitBtn = document.getElementById('slots-reschedule-submit');
-                    var errorEl = document.getElementById('slots-reschedule-error');
-                    var selected = null;
-
-                    function showError(msg) {
-                        errorEl.textContent = msg || '';
-                        errorEl.style.display = msg ? 'block' : 'none';
-                    }
-
-                    function setSelected(slot, button) {
-                        selected = slot;
-                        Array.prototype.forEach.call(
-                            slotsEl.querySelectorAll('.slots-reschedule-slot'),
-                            function(el) {
-                                el.classList.remove('is-selected');
-                                el.setAttribute('aria-pressed', 'false');
-                            }
-                        );
-                        if (button) {
-                            button.classList.add('is-selected');
-                            button.setAttribute('aria-pressed', 'true');
-                        }
-                        submitBtn.disabled = !slot;
-                    }
-
-                    function renderSlots(slots) {
-                        slotsEl.textContent = '';
-                        setSelected(null, null);
-
-                        if (!slots || !slots.length) {
-                            var empty = document.createElement('p');
-                            empty.className = 'slots-manage-notice';
-                            empty.textContent = labels.none;
-                            slotsEl.appendChild(empty);
-                            return;
-                        }
-
-                        slots.forEach(function(slot) {
-                            // The slot the booking already occupies is not a move.
-                            var isCurrent = dateInput.value === currentDate
-                                && slot.time.substring(0, 5) === currentStart.substring(0, 5);
-
-                            var btn = document.createElement('button');
-                            btn.type = 'button';
-                            btn.className = 'slots-reschedule-slot';
-                            btn.setAttribute('aria-pressed', 'false');
-                            btn.textContent = slot.time.substring(0, 5);
-
-                            if (isCurrent) {
-                                btn.disabled = true;
-                                btn.classList.add('is-current');
-                                btn.title = labels.current;
-                            } else {
-                                btn.addEventListener('click', function() {
-                                    showError('');
-                                    setSelected(slot, btn);
-                                });
-                            }
-
-                            slotsEl.appendChild(btn);
-                        });
-                    }
-
-                    function loadSlots() {
-                        showError('');
-                        setSelected(null, null);
-                        slotsEl.textContent = labels.loading;
-
-                        var params = new URLSearchParams();
-                        params.append('date', dateInput.value);
-                        params.append('quantity', quantity);
-                        // Discount this booking from its own availability, so the
-                        // grid shows where it can actually move to.
-                        params.append('manageToken', manageToken);
-                        if (employeeId) { params.append('employeeId', employeeId); }
-                        if (locationId) { params.append('locationId', locationId); }
-                        if (serviceId) { params.append('serviceId', serviceId); }
-                        params.append(csrfName, csrfToken);
-
-                        fetch('/actions/slots/slot/get-available-slots', {
-                            method: 'POST',
-                            headers: {
-                                'Accept': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Content-Type': 'application/x-www-form-urlencoded'
-                            },
-                            body: params.toString()
-                        })
-                            .then(function(r) { return r.json(); })
-                            .then(function(data) {
-                                if (!data || data.success === false) {
-                                    slotsEl.textContent = '';
-                                    showError((data && (data.message || data.error)) || labels.failed);
-                                    return;
-                                }
-                                renderSlots(data.slots || (data.data && data.data.slots) || []);
-                            })
-                            .catch(function() {
-                                slotsEl.textContent = '';
-                                showError(labels.failed);
-                            });
-                    }
-
-                    submitBtn.addEventListener('click', function() {
-                        if (!selected) { return; }
-                        submitBtn.disabled = true;
-                        showError('');
-
-                        var params = new URLSearchParams();
-                        params.append('action', 'reschedule');
-                        params.append('manageToken', manageToken);
-                        params.append('newDate', dateInput.value);
-                        params.append('newStartTime', selected.time);
-                        params.append('newEndTime', selected.endTime);
-                        params.append(csrfName, csrfToken);
-
-                        fetch('/actions/slots/booking-management/manage-booking', {
-                            method: 'POST',
-                            headers: {
-                                'Accept': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Content-Type': 'application/x-www-form-urlencoded'
-                            },
-                            body: params.toString()
-                        })
-                            .then(function(r) { return r.json(); })
-                            .then(function(data) {
-                                if (data && data.success) {
-                                    window.location.href = redirectUrl;
-                                    return;
-                                }
-                                submitBtn.disabled = false;
-                                showError((data && (data.message || data.error)) || labels.failed);
-                            })
-                            .catch(function() {
-                                submitBtn.disabled = false;
-                                showError(labels.failed);
-                            });
-                    });
-
-                    dateInput.addEventListener('change', loadSlots);
-                    loadSlots();
-                })();
-                </script>
             </div>
+        {% endif %}
+
+        {# Everything the quantity and reschedule controls need, handed over as
+           data rather than as generated code. A <script> with a non-JS type is
+           never executed, so a strict CSP leaves it alone — which is the whole
+           point: this page is reached from an email link and used to be the one
+           front-end surface that needed 'unsafe-inline' to work.
+
+           Encoded with JSON_HEX_* so the reflected manage token can't break out
+           of the block, independent of json_encode's slash-escaping — same
+           posture as the wizard's config block. #}
+        {% if not isPast and not isCancelled and (canEditQuantity or canReschedule) %}
+            {% set manageConfig = {
+                reservationId: reservation.getId(),
+                token: reservation.getConfirmationToken(),
+                quantity: reservation.getQuantity(),
+                employeeId: reservation.getEmployeeId(),
+                locationId: reservation.getLocationId(),
+                serviceId: reservation.getServiceId(),
+                currentDate: reservation.getBookingDate(),
+                currentStart: reservation.getStartTime(),
+                redirectUrl: reservation.getManagementUrl(),
+                csrf: {
+                    name: craft.app.config.general.csrfTokenName,
+                    value: craft.app.request.csrfToken,
+                },
+                actions: {
+                    reduceQuantity: actionUrl('slots/booking-management/reduce-quantity'),
+                    increaseQuantity: actionUrl('slots/booking-management/increase-quantity'),
+                    availableSlots: actionUrl('slots/slot/get-available-slots'),
+                    manageBooking: actionUrl('slots/booking-management/manage-booking'),
+                },
+                labels: {
+                    quantityFailed: 'templates.quantityUpdateFailed'|t('slots'),
+                    loading: 'templates.rescheduleLoading'|t('slots'),
+                    none: 'templates.rescheduleNoSlots'|t('slots'),
+                    failed: 'templates.rescheduleFailed'|t('slots'),
+                    current: 'templates.rescheduleCurrentSlot'|t('slots'),
+                },
+            } %}
+            <script type="application/json" data-slots-manage-config>{{ manageConfig|json_encode(constant('JSON_HEX_TAG') b-or constant('JSON_HEX_APOS') b-or constant('JSON_HEX_AMP') b-or constant('JSON_HEX_QUOT'))|raw }}</script>
         {% endif %}
 
         {# Actions #}
