@@ -1,6 +1,6 @@
 {
   "name": "@anvildev/slots-wizard",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Headless booking wizard core + zero-dependency vanilla renderer for the Slots Craft CMS plugin.",
   "license": "proprietary",
   "type": "module",

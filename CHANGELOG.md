@@ -5,7 +5,7 @@ All notable changes to Slots are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## 1.0.1 - 2026-08-05
 
 ### Changed
 - The `stripe/stripe-php` requirement is now a range (`^13.0` through `^21.0`) instead of `^21.0` only,
