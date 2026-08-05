@@ -81,8 +81,8 @@ jobs:
       - name: Install the lowest supported Stripe SDK
         run: |
           composer install --prefer-dist --no-interaction --no-progress
-          composer update stripe/stripe-php --prefer-lowest --with-all-dependencies --no-interaction --no-progress
-          composer show stripe/stripe-php | head -2
+          composer update stripe/stripe-php --prefer-lowest --no-interaction --no-progress
+          composer show stripe/stripe-php
 
       - name: Static analysis (PHPStan)
         run: composer run phpstan
