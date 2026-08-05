@@ -5,6 +5,14 @@ All notable changes to Slots are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Changed
+- The `stripe/stripe-php` requirement is now a range (`^13.0` through `^21.0`) instead of `^21.0` only,
+  so Slots can be installed alongside plugins that cap the same SDK — Formie caps it at `^16`, Craft
+  Commerce's Stripe gateway at `^13`. Slots only uses Payment Intents, refunds and webhook signature
+  verification, all unchanged across that range ([#8](https://github.com/anvildevxyz/craft-slots/issues/8))
+
 ## 1.0.0 - 2026-08-02
 
 First release. See the [README](README.md) for what this plugin does, and

@@ -59,6 +59,37 @@ jobs:
       - name: Unit tests
         run: composer run test
 
+  stripe-floor:
+    name: Stripe SDK floor
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: dom, mbstring, intl, json, pdo
+          coverage: none
+          tools: composer:v2
+
+      # The Stripe SDK range spans v13–v21 so Slots can be installed next to
+      # plugins that cap it lower (Formie at ^16, Commerce Stripe at ^13). The
+      # lock pins the ceiling, so nothing else in CI would notice the floor
+      # breaking — this job is the only thing holding that promise up.
+      - name: Install the lowest supported Stripe SDK
+        run: |
+          composer install --prefer-dist --no-interaction --no-progress
+          composer update stripe/stripe-php --prefer-lowest --with-all-dependencies --no-interaction --no-progress
+          composer show stripe/stripe-php | head -2
+
+      - name: Static analysis (PHPStan)
+        run: composer run phpstan
+
+      - name: Unit tests
+        run: composer run test
+
   js:
     name: JavaScript
     runs-on: ubuntu-latest
