@@ -1534,5 +1534,5 @@ function create(options) {
 }
 
 // src/web/js/core/index.js
-var version = "1.0.0";
+var version = "1.0.1";
 var index_default = { version, create };

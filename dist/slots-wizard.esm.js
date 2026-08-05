@@ -2732,7 +2732,7 @@ function createPaymentStep(opts = {}) {
 }
 
 // src/web/js/ui/index.js
-var version = "1.0.0";
+var version = "1.0.1";
 function registerDefaultSteps(renderer) {
   renderer.registerStep("service", serviceListStep);
   renderer.registerStep("location", locationStep);

@@ -21,7 +21,7 @@ import { successStep } from './steps/success.js';
 import { manageStep } from './steps/manage.js';
 import { createPaymentStep } from './steps/payment.js';
 
-export const version = '1.0.0';
+export const version = '1.0.1';
 
 /** Register the built-in step content renderers on a Renderer instance. */
 function registerDefaultSteps(renderer) {

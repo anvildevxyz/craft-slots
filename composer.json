@@ -2,7 +2,7 @@
     "name": "anvildev/craft-slots",
     "description": "Straightforward appointment booking for Craft CMS, with Stripe payments and no Commerce required",
     "type": "craft-plugin",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "keywords": [
         "craft",
         "cms",
