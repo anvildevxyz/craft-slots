@@ -1,5 +1,4 @@
 {% extends "_layouts/cp" %}
-{% import "_includes/forms" as forms %}
 {% do view.registerAssetBundle("anvildev\\slots\\assetbundles\\SlotsCpAsset") %}
 
 {% set title = 'titles.customers'|t('slots') %}
@@ -16,21 +15,26 @@
 {% endmacro %}
 
 {% block content %}
-    <form method="get" action="{{ url('slots/customers') }}" class="slots-customers-search">
-        {{ forms.text({
-            name: 'search',
-            value: search,
-            placeholder: 'customers.searchPlaceholder'|t('slots'),
-            autocomplete: false,
-        }) }}
-        <button type="submit" class="btn">{{ 'labels.filter'|t('slots') }}</button>
-        {% if search %}
-            <a class="btn" href="{{ url('slots/customers') }}">{{ 'buttons.clear'|t('slots') }}</a>
-        {% endif %}
-    </form>
+    <div class="tableview" id="customers-tableview">
+        <form method="get" action="{{ url('slots/customers') }}" id="customers-filter-form">
+            <div class="toolbar flex flex-nowrap">
+                <div class="flex-grow texticon search icon clearable">
+                    <input type="text"
+                           name="search"
+                           id="search-input"
+                           class="text fullwidth"
+                           placeholder="{{ 'customers.searchPlaceholder'|t('slots') }}"
+                           value="{{ search }}"
+                           autocomplete="off">
+                </div>
+                <button type="submit" class="btn">{{ 'labels.filter'|t('slots') }}</button>
+                {% if search %}
+                    <a class="btn" href="{{ url('slots/customers') }}">{{ 'buttons.clear'|t('slots') }}</a>
+                {% endif %}
+            </div>
+        </form>
 
-    {% if customers|length %}
-        <div class="tableview">
+        {% if customers|length %}
             <table class="data fullwidth">
                 <thead>
                     <tr>
@@ -75,29 +79,29 @@
                     {% endfor %}
                 </tbody>
             </table>
-        </div>
 
-        {% if totalPages > 1 %}
-            <div class="slots-pagination">
-                {% set pageParams = search ? { search: search, sort: sort, dir: dir } : { sort: sort, dir: dir } %}
-                {% if page > 1 %}
-                    <a class="btn" href="{{ url('slots/customers', pageParams|merge({ page: page - 1 })) }}">
-                        {{ 'calendar.previous'|t('slots') }}
-                    </a>
-                {% endif %}
-                <span class="light">{{ 'customers.pageOf'|t('slots', { page: page, total: totalPages }) }}</span>
-                {% if page < totalPages %}
-                    <a class="btn" href="{{ url('slots/customers', pageParams|merge({ page: page + 1 })) }}">
-                        {{ 'calendar.next'|t('slots') }}
-                    </a>
-                {% endif %}
+            {% if totalPages > 1 %}
+                <div class="slots-pagination">
+                    {% set pageParams = search ? { search: search, sort: sort, dir: dir } : { sort: sort, dir: dir } %}
+                    {% if page > 1 %}
+                        <a class="btn" href="{{ url('slots/customers', pageParams|merge({ page: page - 1 })) }}">
+                            {{ 'calendar.previous'|t('slots') }}
+                        </a>
+                    {% endif %}
+                    <span class="light">{{ 'customers.pageOf'|t('slots', { page: page, total: totalPages }) }}</span>
+                    {% if page < totalPages %}
+                        <a class="btn" href="{{ url('slots/customers', pageParams|merge({ page: page + 1 })) }}">
+                            {{ 'calendar.next'|t('slots') }}
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            <p class="light">{{ 'customers.totalCount'|t('slots', { count: total }) }}</p>
+        {% else %}
+            <div class="zilch">
+                <p>{{ search ? 'customers.noneMatching'|t('slots') : 'customers.none'|t('slots') }}</p>
             </div>
         {% endif %}
-
-        <p class="light">{{ 'customers.totalCount'|t('slots', { count: total }) }}</p>
-    {% else %}
-        <div class="zilch">
-            <p>{{ search ? 'customers.noneMatching'|t('slots') : 'customers.none'|t('slots') }}</p>
-        </div>
-    {% endif %}
+    </div>
 {% endblock %}
