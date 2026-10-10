@@ -1,20 +1,35 @@
 import { defineConfig } from 'vitest/config';
 
-// The headless core is DOM-free by contract, so tests run in the plain
-// Node environment. The M2 renderer will add a jsdom project of its own.
+// The headless core is DOM-free by contract, so its tests run in the plain
+// Node environment; the renderer needs a DOM. `environmentMatchGlobs` (the
+// old way to split that by glob) was removed in Vitest 5 — `test.projects`
+// is the replacement, one sub-project per environment.
 export default defineConfig({
   // Inline empty PostCSS config so Vite doesn't walk up and load the host
   // project's postcss.config.js (which pulls in autoprefixer we don't have).
   css: { postcss: {} },
   test: {
-    include: ['src/web/js/core/**/*.test.js', 'src/web/js/ui/**/*.test.js'],
-    // Core is DOM-free (node); the renderer needs a DOM (jsdom).
-    environment: 'node',
-    environmentMatchGlobs: [['src/web/js/ui/**', 'jsdom']],
-    globals: false,
     coverage: {
       include: ['src/web/js/core/**/*.js', 'src/web/js/ui/**/*.js'],
       exclude: ['**/*.test.js'],
     },
+    projects: [
+      {
+        test: {
+          name: 'core',
+          include: ['src/web/js/core/**/*.test.js'],
+          environment: 'node',
+          globals: false,
+        },
+      },
+      {
+        test: {
+          name: 'ui',
+          include: ['src/web/js/ui/**/*.test.js'],
+          environment: 'jsdom',
+          globals: false,
+        },
+      },
+    ],
   },
 });
