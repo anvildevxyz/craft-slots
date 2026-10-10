@@ -5,6 +5,11 @@ All notable changes to Slots are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.0.2 - 2026-10-10
+
+### Fixed
+- **The customer index's search field and Filter button weren't on the same line.** They weren't wrapped in a flex container, so they stacked instead of sitting side by side, and the page was also missing the gap the bookings index has between its search bar and its results. Both now use the same CP toolbar pattern the bookings index does ([#18](https://github.com/anvildevxyz/craft-slots/issues/18))
+
 ## 1.0.1 - 2026-08-05
 
 ### Changed
