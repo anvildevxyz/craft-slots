@@ -1800,7 +1800,8 @@
     padding-right: 8px;
 }
 
-#bookings-filter-form {
+#bookings-filter-form,
+#customers-filter-form {
     margin-bottom: 14px;
 }
 
