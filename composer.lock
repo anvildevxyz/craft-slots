@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0e74f2c0ee3d30405ec49eef8f9375fa",
+    "content-hash": "d6decbbd4871107599529a66b7e2771f",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -4209,16 +4209,16 @@
         },
         {
             "name": "stripe/stripe-php",
-            "version": "v21.1.1",
+            "version": "v21.3.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/stripe/stripe-php.git",
-                "reference": "5f68d5a285d206a757ebbd9bf0e037759a61c379"
+                "reference": "3d52008ffeab02763b02462802393f3d4da2aa51"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/stripe/stripe-php/zipball/5f68d5a285d206a757ebbd9bf0e037759a61c379",
-                "reference": "5f68d5a285d206a757ebbd9bf0e037759a61c379",
+                "url": "https://api.github.com/repos/stripe/stripe-php/zipball/3d52008ffeab02763b02462802393f3d4da2aa51",
+                "reference": "3d52008ffeab02763b02462802393f3d4da2aa51",
                 "shasum": ""
             },
             "require": {
@@ -4265,9 +4265,9 @@
             ],
             "support": {
                 "issues": "https://github.com/stripe/stripe-php/issues",
-                "source": "https://github.com/stripe/stripe-php/tree/v21.1.1"
+                "source": "https://github.com/stripe/stripe-php/tree/v21.3.3"
             },
-            "time": "2026-07-30T18:43:28+00:00"
+            "time": "2026-10-27T19:47:35+00:00"
         },
         {
             "name": "symfony/clock",
