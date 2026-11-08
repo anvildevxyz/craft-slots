@@ -75,6 +75,7 @@ class Slots extends Plugin
             : 'anvildev\\slots\\controllers';
 
         $this->registerServices();
+        $this->registerCraftMcp();
         $this->registerCpRoutes();
         $this->registerSiteRoutes();
         $this->registerApiRoutes();
@@ -664,6 +665,37 @@ class Slots extends Plugin
                     Craft::info("Maintenance cleanup completed: " . json_encode($results), __METHOD__);
                 }
             }
+        );
+    }
+
+    /**
+     * Registers Slots' tools with Craft's MCP server (5.12+). Older Craft has
+     * no Mcp service, so the guard leaves those installs unchanged.
+     */
+    private function registerCraftMcp(): void
+    {
+        if (!class_exists(\craft\services\Mcp::class)) {
+            return;
+        }
+
+        Event::on(
+            \craft\services\Mcp::class,
+            \craft\services\Mcp::EVENT_REGISTER_CAPABILITY_TYPES,
+            static function(\craft\events\RegisterComponentTypesEvent $event): void {
+                $event->types[] = \anvildev\slots\mcp\CraftTools::class;
+            },
+        );
+
+        if (!class_exists(\craft\mcp\AdminInstructions::class)) {
+            return;
+        }
+
+        Event::on(
+            \craft\mcp\AdminInstructions::class,
+            \craft\mcp\AdminInstructions::EVENT_COLLECT_INSTRUCTIONS,
+            static function(\craft\mcp\events\CollectingAdminInstructions $event): void {
+                $event->instructions[] = 'Use the slots_* tools to list services, check one date’s availability, and read upcoming reservations. Customer contact details are not included. The only write is slots_cancel_reservation. There is no tool to create a booking or issue a refund.';
+            },
         );
     }
 }
