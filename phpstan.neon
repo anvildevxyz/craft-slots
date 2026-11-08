@@ -18,6 +18,10 @@ parameters:
         - stubs/phpstan-bootstrap.php
     ignoreErrors:        # Common patterns for Craft CMS plugins
         - '#Cannot access offset .+ on mixed#'
+        # Craft 5.12 MCP classes. Absent on the locked CMS, and class_exists-guarded.
+        - '#Mcp\\Schema\\ToolAnnotations#'
+        - '#Mcp\\Capability\\Attribute\\#'
+        - '#craft\\mcp\\#'
         - '#Cannot cast mixed to#'
         # Controller return types - asJson() and renderTemplate() return craft\web\Response
         - '#Method .+ should return craft\\web\\Response but returns yii\\web\\Response#'

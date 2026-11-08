@@ -5,6 +5,11 @@ All notable changes to Slots are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Added
+- Craft 5.12 MCP tools to list services, check one date’s availability, and read upcoming reservations without customer contact details. The only write cancels a reservation through the existing booking service. Creating a booking and refunds are not exposed.
+
 ## 1.0.2 - 2026-10-10
 
 ### Fixed
